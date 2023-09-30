@@ -31,4 +31,16 @@ class Task {
     );
   }
 
+  Map<String, dynamic> toJson() {
+  return {
+    'taskId': taskId,
+    'taskName': taskName,
+    'description': description,
+    'createdDate': createdDate.toIso8601String(),
+    'dueDate': dueDate.toIso8601String(),
+    'status': status,
+    'priority': priority,
+  };
+}
+
 }
