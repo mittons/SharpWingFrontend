@@ -1,2 +1,2 @@
-ChatGPT - Flutter frontend code for initial commit + some c# code on cors.
-	https://chat.openai.com/share/bae05fe5-497b-4d9b-b508-61208ff77e13
+ChatGPT - Questions on flutter + Flutter code for edit screen.
+	https://chat.openai.com/share/b6d97b09-6c86-4547-a07a-956d12522c58
