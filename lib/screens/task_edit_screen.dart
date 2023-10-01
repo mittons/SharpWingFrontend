@@ -29,7 +29,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Task'),
+        title: const Text('Edit Task'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -37,11 +37,11 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
           children: <Widget>[
             TextField(
               controller: taskNameController,
-              decoration: InputDecoration(labelText: 'Task Name'),
+              decoration: const InputDecoration(labelText: 'Task Name'),
             ),
             TextField(
               controller: descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: 'Description'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -67,6 +67,8 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                   // Task updated successfully, call the onSave callback
                   widget.onSave(updatedTask);
 
+                  if (!context.mounted) return;
+
                   // Task updated successfully, you can handle the response as needed
                   Navigator.pop(context); // Close the edit screen
                 } else {
@@ -74,7 +76,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                   print('Failed to update task: ${response.statusCode}');
                 }
               },
-              child: Text('Save Changes'),
+              child: const Text('Save Changes'),
             ),
           ],
         ),
