@@ -10,7 +10,7 @@ class TaskEditScreen extends StatefulWidget {
   TaskEditScreen({required this.task, required this.onSave});
 
   @override
-  _TaskEditScreenState createState() => _TaskEditScreenState();
+  State<TaskEditScreen> createState() => _TaskEditScreenState();
 }
 
 class _TaskEditScreenState extends State<TaskEditScreen> {
