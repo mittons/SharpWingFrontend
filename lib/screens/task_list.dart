@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
+import 'package:sharp_wing_frontend/widgets/task_create_widget.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
 
@@ -38,49 +39,66 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Task List'),
-      ),
-      body: ListView.builder(
-        itemCount: tasks.length,
-        itemBuilder: (context, index) {
-          final task = tasks[index];
-          return TaskListItem(
-            task: task,
-            onCheckboxToggle: (taskToUpdate, newValue) {
-              setState(() {
-                taskToUpdate.status = newValue! ? 'completed' : 'not completed';
-              });
-            },
-            onEdit: (editTask) {
-              // Handle the update action
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => TaskEditScreen(
+        appBar: AppBar(
+          title: const Text('Task List'),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: tasks.length,
+                itemBuilder: (context, index) {
+                  final task = tasks[index];
+                  return TaskListItem(
                     task: task,
-                    taskService: widget.taskService,
-                    onSave: (updatedTask) {
-                      // Update the task in the original list of tasks
+                    onCheckboxToggle: (taskToUpdate, newValue) {
                       setState(() {
-                        int index = tasks.indexWhere(
-                            (task) => task.taskId == updatedTask.taskId);
-                        if (index != -1) {
-                          tasks[index] = updatedTask;
-                        }
+                        taskToUpdate.status =
+                            newValue! ? 'completed' : 'not completed';
                       });
                     },
-                  ),
-                ),
-              );
-            },
-            onDelete: (deleteTask) {
-              setState(() {
-                tasks.removeAt(index);
-              });
-            },
-          ); // Use the TaskListItem widget
-        },
-      ),
-    );
+                    onEdit: (editTask) {
+                      // Handle the update action
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => TaskEditScreen(
+                            task: task,
+                            taskService: widget.taskService,
+                            onSave: (updatedTask) {
+                              // Update the task in the original list of tasks
+                              setState(() {
+                                int index = tasks.indexWhere((task) =>
+                                    task.taskId == updatedTask.taskId);
+                                if (index != -1) {
+                                  tasks[index] = updatedTask;
+                                }
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    },
+                    onDelete: (deleteTask) {
+                      setState(() {
+                        tasks.removeAt(index);
+                      });
+                    },
+                  ); // Use the TaskListItem widget
+                },
+              ),
+            ),
+            TaskCreateWidget(onCreateTask: _createTask)
+          ],
+        ));
+  }
+
+  Future<void> _createTask(Task createdTask) async {
+    Task createdTaskFromApi = await widget.taskService.createTask(createdTask);
+
+    if (!context.mounted) return;
+
+    setState(() {
+      tasks.add(createdTaskFromApi);
+    });
   }
 }
