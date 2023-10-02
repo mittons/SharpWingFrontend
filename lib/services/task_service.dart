@@ -61,6 +61,7 @@ class TaskService {
     );
 
     if (response.statusCode != 204) {
+      print('Failed to update task: ${response.statusCode}');
       throw Exception('Failed to update task');
     }
   }

@@ -5,8 +5,6 @@ import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class TaskListScreen extends StatefulWidget {
   final TaskService taskService;
@@ -60,6 +58,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 MaterialPageRoute(
                   builder: (context) => TaskEditScreen(
                     task: task,
+                    taskService: widget.taskService,
                     onSave: (updatedTask) {
                       // Update the task in the original list of tasks
                       setState(() {

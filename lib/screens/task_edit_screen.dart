@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:sharp_wing_frontend/services/task_service.dart';
 
 class TaskEditScreen extends StatefulWidget {
   final Task task;
   final Function(Task updatedTask) onSave;
+  final TaskService taskService;
 
-  const TaskEditScreen({super.key, required this.task, required this.onSave});
+  const TaskEditScreen(
+      {super.key,
+      required this.task,
+      required this.onSave,
+      required this.taskService});
 
   @override
   State<TaskEditScreen> createState() => _TaskEditScreenState();
@@ -56,26 +60,18 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                   status: widget.task.status,
                   priority: widget.task.priority,
                 );
+                try {
+                  await widget.taskService
+                      .updateTask(widget.task.taskId, updatedTask);
 
-                // Make a PUT request to update the task
-                final response = await http.put(
-                  Uri.parse(
-                      'http://localhost:5000/api/tasks/${widget.task.taskId}'),
-                  headers: {'Content-Type': 'application/json'},
-                  body: jsonEncode(updatedTask.toJson()),
-                );
-
-                if (response.statusCode == 204) {
                   // Task updated successfully, call the onSave callback
                   widget.onSave(updatedTask);
 
                   if (!context.mounted) return;
 
-                  // Task updated successfully, you can handle the response as needed
-                  Navigator.pop(context); // Close the edit screen
-                } else {
-                  // Handle error, e.g., show an error message
-                  print('Failed to update task: ${response.statusCode}');
+                  Navigator.pop(context);
+                } catch (exception) {
+                  //Failed to edit task task
                 }
               },
               child: const Text('Save Changes'),
