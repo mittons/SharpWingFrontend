@@ -28,7 +28,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   Future<void> _loadTasks() async {
     try {
-      final List<Task> loadedTasks = await fetchTasks();
+      final List<Task> loadedTasks = await widget.taskService.getAllTasks();
       setState(() {
         tasks = loadedTasks;
       });
@@ -83,23 +83,5 @@ class _TaskListScreenState extends State<TaskListScreen> {
         },
       ),
     );
-  }
-
-  Future<List<Task>> fetchTasks() async {
-    final response =
-        await http.get(Uri.parse('http://localhost:5000/api/tasks'));
-
-    if (response.statusCode == 200) {
-      // If the server returns a 200 OK response, parse the JSON
-      final List<dynamic> jsonResponse = json.decode(response.body);
-      final List<Task> tasks = jsonResponse
-          .map((taskJson) => Task.fromJson(taskJson as Map<String, dynamic>))
-          .toList();
-      return tasks;
-    } else {
-      // If the server did not return a 200 OK response,
-      // throw an exception or handle the error as needed.
-      throw Exception('Failed to load tasks');
-    }
   }
 }

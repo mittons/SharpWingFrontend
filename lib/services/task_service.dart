@@ -11,12 +11,15 @@ class TaskService {
     final response = await http.get(Uri.parse('$baseApiUrl/api/tasks'));
 
     if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
       final List<dynamic> jsonResponse = json.decode(response.body);
       final List<Task> tasks = jsonResponse
           .map((taskJson) => Task.fromJson(taskJson as Map<String, dynamic>))
           .toList();
       return tasks;
     } else {
+      // If the server did not return a 200 OK response,
+      // throw an exception or handle the error as needed.
       throw Exception('Failed to load tasks');
     }
   }

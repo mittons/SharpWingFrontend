@@ -10,7 +10,7 @@ AppConfig activeConfig = ProductionConfig();
 void main() {
   // Load configuration based on environment or configuration profile
   // Example: Set activeConfig to TestConfig for testing
-  activeConfig = TestConfig();
+  activeConfig = DevConfig();
   runApp(TaskListApp(config: activeConfig));
 }
 
