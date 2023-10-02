@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
+import 'package:sharp_wing_frontend/services/task_service.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class TaskListScreen extends StatefulWidget {
-  const TaskListScreen({Key? key}) : super(key: key);
+  final TaskService taskService;
+
+  const TaskListScreen({Key? key, required this.taskService}) : super(key: key);
 
   @override
   State<TaskListScreen> createState() => _TaskListScreenState();
@@ -47,9 +50,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
           return TaskListItem(
             task: task,
             onCheckboxToggle: (taskToUpdate, newValue) {
-                setState(() {
-                  taskToUpdate.status = newValue! ? 'completed' : 'not completed';
-                });
+              setState(() {
+                taskToUpdate.status = newValue! ? 'completed' : 'not completed';
+              });
             },
             onEdit: (editTask) {
               // Handle the update action
@@ -60,7 +63,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                     onSave: (updatedTask) {
                       // Update the task in the original list of tasks
                       setState(() {
-                        int index = tasks.indexWhere((task) => task.taskId == updatedTask.taskId);
+                        int index = tasks.indexWhere(
+                            (task) => task.taskId == updatedTask.taskId);
                         if (index != -1) {
                           tasks[index] = updatedTask;
                         }
@@ -82,7 +86,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
   }
 
   Future<List<Task>> fetchTasks() async {
-    final response = await http.get(Uri.parse('http://localhost:5000/api/tasks'));
+    final response =
+        await http.get(Uri.parse('http://localhost:5000/api/tasks'));
 
     if (response.statusCode == 200) {
       // If the server returns a 200 OK response, parse the JSON
@@ -97,5 +102,4 @@ class _TaskListScreenState extends State<TaskListScreen> {
       throw Exception('Failed to load tasks');
     }
   }
-
 }

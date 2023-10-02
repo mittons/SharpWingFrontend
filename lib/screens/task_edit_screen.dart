@@ -7,7 +7,7 @@ class TaskEditScreen extends StatefulWidget {
   final Task task;
   final Function(Task updatedTask) onSave;
 
-  TaskEditScreen({required this.task, required this.onSave});
+  const TaskEditScreen({super.key, required this.task, required this.onSave});
 
   @override
   State<TaskEditScreen> createState() => _TaskEditScreenState();
@@ -32,7 +32,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
         title: const Text('Edit Task'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
             TextField(
@@ -50,7 +50,8 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                   taskId: widget.task.taskId, // Use the original task's taskId
                   taskName: taskNameController.text,
                   description: descriptionController.text,
-                  createdDate: widget.task.createdDate, // Use the original task's values
+                  createdDate:
+                      widget.task.createdDate, // Use the original task's values
                   dueDate: widget.task.dueDate,
                   status: widget.task.status,
                   priority: widget.task.priority,
@@ -58,7 +59,8 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
 
                 // Make a PUT request to update the task
                 final response = await http.put(
-                  Uri.parse('http://localhost:5000/api/tasks/${widget.task.taskId}'),
+                  Uri.parse(
+                      'http://localhost:5000/api/tasks/${widget.task.taskId}'),
                   headers: {'Content-Type': 'application/json'},
                   body: jsonEncode(updatedTask.toJson()),
                 );

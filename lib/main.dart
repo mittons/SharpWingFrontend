@@ -2,13 +2,22 @@
 
 import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/screens/task_list.dart';
+import 'package:sharp_wing_frontend/config/config.dart';
+import 'package:sharp_wing_frontend/services/task_service.dart';
+
+AppConfig activeConfig = ProductionConfig();
 
 void main() {
-  runApp(TaskListApp());
+  // Load configuration based on environment or configuration profile
+  // Example: Set activeConfig to TestConfig for testing
+  activeConfig = TestConfig();
+  runApp(TaskListApp(config: activeConfig));
 }
 
 class TaskListApp extends StatelessWidget {
-  const TaskListApp({super.key});
+  final AppConfig config;
+
+  TaskListApp({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +26,9 @@ class TaskListApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: TaskListScreen(),
+      home: TaskListScreen(
+        taskService: TaskService(baseApiUrl: config.baseApiUrl),
+      ),
     );
   }
 }

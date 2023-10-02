@@ -7,7 +7,12 @@ class TaskListItem extends StatelessWidget {
   final Function(Task deleteTask) onDelete;
   final Function(Task taskToUpdate, bool? newValue) onCheckboxToggle;
 
-  const TaskListItem({super.key, required this.task, required this.onEdit, required this.onDelete, required this.onCheckboxToggle});
+  const TaskListItem(
+      {super.key,
+      required this.task,
+      required this.onEdit,
+      required this.onDelete,
+      required this.onCheckboxToggle});
 
   @override
   Widget build(BuildContext context) {
