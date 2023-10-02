@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
+import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -32,103 +33,53 @@ class _TaskListScreenState extends State<TaskListScreen> {
       // Handle the error, e.g., show an error message to the user
     }
   }
-/*
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Task List'),
-      ),
-      body: ListView.builder(
-        itemCount: tasks.length,
-        itemBuilder: (context, index) {
-          final task = tasks[index];
-          return ListTile(
-            title: Text(task.taskName),
-            subtitle: Text(task.description),
-            trailing: Text(task.dueDate.toString()), // You can format this as needed
-            leading: Checkbox(
-              value: task.status == 'completed',
-              onChanged: (newValue) {
-                setState(() {
-                  task.status = newValue! ? 'completed' : 'not completed';
-                });
-              },
-            ),
-          );
-        },
-      ),
-    );
-  }
-*/
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Task List'),
+        title: const Text('Task List'),
       ),
       body: ListView.builder(
         itemCount: tasks.length,
         itemBuilder: (context, index) {
           final task = tasks[index];
-          return ListTile(
-            title: Text(task.taskName),
-            subtitle: Text(task.description),
-            //trailing: Text(task.dueDate.toString()), // You can format this as needed
-            leading: Checkbox(
-              value: task.status == 'completed',
-              onChanged: (newValue) {
+          return TaskListItem(
+            task: task,
+            onCheckboxToggle: (taskToUpdate, newValue) {
                 setState(() {
-                  task.status = newValue! ? 'completed' : 'not completed';
+                  taskToUpdate.status = newValue! ? 'completed' : 'not completed';
                 });
-              },
-            ),
-            // Add update and delete buttons
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(task.dueDate.toString()), // You can format this as needed
-                IconButton(
-                  icon: Icon(Icons.edit),
-                  onPressed: () {
-                    // Handle the update action
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => TaskEditScreen(
-                          task: task,
-                          onSave: (updatedTask) {
-                            // Update the task in the original list of tasks
-                            setState(() {
-                              int index = tasks.indexWhere((task) => task.taskId == updatedTask.taskId);
-                              if (index != -1) {
-                                tasks[index] = updatedTask;
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    );
-                  },
+            },
+            onEdit: (editTask) {
+              // Handle the update action
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => TaskEditScreen(
+                    task: task,
+                    onSave: (updatedTask) {
+                      // Update the task in the original list of tasks
+                      setState(() {
+                        int index = tasks.indexWhere((task) => task.taskId == updatedTask.taskId);
+                        if (index != -1) {
+                          tasks[index] = updatedTask;
+                        }
+                      });
+                    },
+                  ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.delete),
-                  onPressed: () {
-                    // Handle the delete action
-                    setState(() {
-                      tasks.removeAt(index);
-                    });
-                  },
-                ),
-              ],
-            ),
-          );
+              );
+            },
+            onDelete: (deleteTask) {
+              setState(() {
+                tasks.removeAt(index);
+              });
+            },
+          ); // Use the TaskListItem widget
         },
       ),
     );
   }
-
 
   Future<List<Task>> fetchTasks() async {
     final response = await http.get(Uri.parse('http://localhost:5000/api/tasks'));
