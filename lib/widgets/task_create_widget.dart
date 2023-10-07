@@ -4,10 +4,10 @@ import 'package:sharp_wing_frontend/models/task.dart';
 class TaskCreateWidget extends StatefulWidget {
   final Function(Task createdTask) onCreateTask;
 
-  TaskCreateWidget({required this.onCreateTask});
+  const TaskCreateWidget({super.key, required this.onCreateTask});
 
   @override
-  _TaskCreateWidgetState createState() => _TaskCreateWidgetState();
+  State<TaskCreateWidget> createState() => _TaskCreateWidgetState();
 }
 
 class _TaskCreateWidgetState extends State<TaskCreateWidget> {
@@ -17,7 +17,7 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -28,12 +28,12 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
           const SizedBox(height: 16.0),
           TextField(
             controller: taskNameController,
-            decoration: InputDecoration(labelText: 'Task Name'),
+            decoration: const InputDecoration(labelText: 'Task Name'),
           ),
           const SizedBox(height: 16.0),
           TextField(
             controller: descriptionController,
-            decoration: InputDecoration(labelText: 'Description'),
+            decoration: const InputDecoration(labelText: 'Description'),
           ),
           const SizedBox(height: 16.0),
           ElevatedButton(

@@ -4,7 +4,7 @@ import 'package:sharp_wing_frontend/models/task.dart';
 class TaskListItem extends StatelessWidget {
   final Task task;
   final Function(Task editTask) onEdit;
-  final Function(Task deleteTask) onDelete;
+  final Function(Task taskToDelete) onDelete;
   final Function(Task taskToUpdate, bool? newValue) onCheckboxToggle;
 
   const TaskListItem(

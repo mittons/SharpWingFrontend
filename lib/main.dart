@@ -17,7 +17,7 @@ void main() {
 class TaskListApp extends StatelessWidget {
   final AppConfig config;
 
-  TaskListApp({super.key, required this.config});
+  const TaskListApp({super.key, required this.config});
 
   @override
   Widget build(BuildContext context) {

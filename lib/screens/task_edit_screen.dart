@@ -48,37 +48,39 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
               decoration: const InputDecoration(labelText: 'Description'),
             ),
             ElevatedButton(
-              onPressed: () async {
-                // Update task data
-                final updatedTask = Task(
-                  taskId: widget.task.taskId, // Use the original task's taskId
-                  taskName: taskNameController.text,
-                  description: descriptionController.text,
-                  createdDate:
-                      widget.task.createdDate, // Use the original task's values
-                  dueDate: widget.task.dueDate,
-                  status: widget.task.status,
-                  priority: widget.task.priority,
-                );
-                try {
-                  await widget.taskService
-                      .updateTask(widget.task.taskId, updatedTask);
-
-                  // Task updated successfully, call the onSave callback
-                  widget.onSave(updatedTask);
-
-                  if (!context.mounted) return;
-
-                  Navigator.pop(context);
-                } catch (exception) {
-                  //Failed to edit task task
-                }
-              },
+              onPressed: _updateTask,
               child: const Text('Save Changes'),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _updateTask() async {
+    // Update task data
+    final updatedTask = Task(
+      taskId: widget.task.taskId,
+      taskName: taskNameController.text,
+      description: descriptionController.text,
+      createdDate: widget.task.createdDate,
+      dueDate: widget.task.dueDate,
+      status: widget.task.status,
+      priority: widget.task.priority,
+    );
+
+    try {
+      await widget.taskService.updateTask(widget.task.taskId, updatedTask);
+
+      // Task updated successfully, call the onSave callback
+      widget.onSave(updatedTask);
+
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+    } catch (exception) {
+      // Failed to edit task
+      // Consider showing an error message or handle accordingly
+    }
   }
 }

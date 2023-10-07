@@ -51,45 +51,46 @@ class _TaskListScreenState extends State<TaskListScreen> {
                   final task = tasks[index];
                   return TaskListItem(
                     task: task,
-                    onCheckboxToggle: (taskToUpdate, newValue) {
-                      setState(() {
-                        taskToUpdate.status =
-                            newValue! ? 'completed' : 'not completed';
-                      });
-                    },
-                    onEdit: (editTask) {
-                      // Handle the update action
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => TaskEditScreen(
-                            task: task,
-                            taskService: widget.taskService,
-                            onSave: (updatedTask) {
-                              // Update the task in the original list of tasks
-                              setState(() {
-                                int index = tasks.indexWhere((task) =>
-                                    task.taskId == updatedTask.taskId);
-                                if (index != -1) {
-                                  tasks[index] = updatedTask;
-                                }
-                              });
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                    onDelete: (deleteTask) {
-                      setState(() {
-                        tasks.removeAt(index);
-                      });
-                    },
-                  ); // Use the TaskListItem widget
+                    onCheckboxToggle: _toggleTaskStatus,
+                    onEdit: _openTaskEditorScreen,
+                    onDelete: _deleteTask,
+                  );
                 },
               ),
             ),
             TaskCreateWidget(onCreateTask: _createTask)
           ],
         ));
+  }
+
+  void _openTaskEditorScreen(Task task) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => TaskEditScreen(
+          task: task,
+          taskService: widget.taskService,
+          onSave: (updatedTask) {
+            // Update the task in the original list of tasks
+            setState(() {
+              int index =
+                  tasks.indexWhere((task) => task.taskId == updatedTask.taskId);
+              if (index != -1) {
+                tasks[index] = updatedTask;
+              }
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleTaskStatus(Task taskToUpdate, newValue) async {
+    taskToUpdate.status = newValue! ? 'completed' : 'not completed';
+    widget.taskService.updateTask(taskToUpdate.taskId, taskToUpdate);
+
+    if (!context.mounted) return;
+
+    setState(() {});
   }
 
   Future<void> _createTask(Task createdTask) async {
@@ -100,5 +101,19 @@ class _TaskListScreenState extends State<TaskListScreen> {
     setState(() {
       tasks.add(createdTaskFromApi);
     });
+  }
+
+  Future<void> _deleteTask(Task taskToDelete) async {
+    try {
+      await widget.taskService.deleteTask(taskToDelete.taskId);
+
+      if (!context.mounted) return;
+
+      setState(() {
+        tasks.remove(taskToDelete);
+      });
+    } catch (exception) {
+      //failed to delete task
+    }
   }
 }
