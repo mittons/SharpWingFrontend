@@ -31,7 +31,6 @@ class TaskListItem extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text(task.dueDate.toString()), // You can format this as needed
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {

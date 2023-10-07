@@ -64,9 +64,8 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
       taskName: taskNameController.text,
       description: descriptionController.text,
       createdDate: widget.task.createdDate,
-      dueDate: widget.task.dueDate,
       status: widget.task.status,
-      priority: widget.task.priority,
+      taskLifecycleType: widget.task.taskLifecycleType,
     );
 
     try {

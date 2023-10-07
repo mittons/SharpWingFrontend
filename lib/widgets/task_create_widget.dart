@@ -60,9 +60,8 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
       taskName: taskName,
       description: description,
       createdDate: DateTime.now(),
-      dueDate: DateTime.now(), // You can set the due date as needed
       status: 'not completed',
-      priority: 'medium', // Set priority as needed
+      taskLifecycleType: 'AdHoc',
     );
 
     // Call the onSave callback to handle the new task
