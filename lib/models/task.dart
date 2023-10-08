@@ -1,12 +1,14 @@
 // lib/models/task.dart
 
+enum TaskLifecycleType { Setup, Recurring, Closure, AdHoc }
+
 class Task {
   final int taskId;
   final String taskName;
   final String description;
   final DateTime createdDate;
   String status;
-  final String taskLifecycleType;
+  final TaskLifecycleType taskLifecycleType;
 
   Task({
     required this.taskId,
@@ -24,7 +26,8 @@ class Task {
       description: json['description'],
       createdDate: DateTime.parse(json['createdDate']),
       status: json['status'],
-      taskLifecycleType: json['taskLifecycleType'],
+      taskLifecycleType:
+          TaskLifecycleType.values[json['taskLifecycleType'] as int],
     );
   }
 
@@ -35,7 +38,7 @@ class Task {
       'description': description,
       'createdDate': createdDate.toIso8601String(),
       'status': status,
-      'taskLifecycleType': taskLifecycleType,
+      'taskLifecycleType': taskLifecycleType.index,
     };
   }
 }
