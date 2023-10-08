@@ -1,2 +1,2 @@
 ChatGPT - Code assistance
-	https://chat.openai.com/c/889a0cda-38e6-44c7-b6e4-e41136a6c7b3
+	https://chat.openai.com/share/12ff15a4-ea07-4520-919f-c3ddfe36ba45

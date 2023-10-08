@@ -5,6 +5,7 @@ import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
 import 'package:sharp_wing_frontend/widgets/task_create_widget.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
+import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
 
 class TaskListScreen extends StatefulWidget {
@@ -45,17 +46,21 @@ class _TaskListScreenState extends State<TaskListScreen> {
         body: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                itemCount: tasks.length,
-                itemBuilder: (context, index) {
-                  final task = tasks[index];
-                  return TaskListItem(
-                    task: task,
-                    onCheckboxToggle: _toggleTaskStatus,
-                    onEdit: _openTaskEditorScreen,
-                    onDelete: _deleteTask,
-                  );
-                },
+              child: ListView(
+                children: TaskLifecycleType.values.expand((type) {
+                  final tasksForType = tasks
+                      .where((task) => task.taskLifecycleType == type)
+                      .toList();
+                  return [
+                    TaskListSection(
+                        lifecycleType: type,
+                        tasks: tasksForType,
+                        onCheckboxToggle: _toggleTaskStatus,
+                        onEdit: _openTaskEditorScreen,
+                        onDelete: _deleteTask),
+                    const SizedBox(height: 20.0), // Spacing between sections
+                  ];
+                }).toList(),
               ),
             ),
             TaskCreateWidget(onCreateTask: _createTask)
