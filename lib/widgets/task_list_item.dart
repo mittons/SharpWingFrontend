@@ -16,36 +16,43 @@ class TaskListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(task.taskName),
-      subtitle: Text(task.description),
-      leading: Checkbox(
-        value: task.status == 'completed',
-        onChanged: (newValue) {
-          // Handle checkbox state change
-          onCheckboxToggle(task, newValue);
-        },
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0),
       ),
-      // Add update and delete buttons
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              // Handle the update action
-              onEdit(task);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              onDelete(task);
-              // Handle the delete action
-            },
-          ),
-        ],
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 8),
+      child: ListTile(
+        title: Text(task.taskName),
+        subtitle: Text(task.description),
+        leading: Checkbox(
+          value: task.status == 'completed',
+          onChanged: (newValue) {
+            // Handle checkbox state change
+            onCheckboxToggle(task, newValue);
+          },
+        ),
+        // Add update and delete buttons
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                // Handle the update action
+                onEdit(task);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () {
+                onDelete(task);
+                // Handle the delete action
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
