@@ -9,15 +9,16 @@ class TaskListSection extends StatefulWidget {
   final Function(Task taskToDelete) onDelete;
   final Function(Task taskToUpdate, bool? newValue) onCheckboxToggle;
 
-  TaskListSection(
-      {required this.lifecycleType,
+  const TaskListSection(
+      {super.key,
+      required this.lifecycleType,
       required this.tasks,
       required this.onEdit,
       required this.onDelete,
       required this.onCheckboxToggle});
 
   @override
-  _TaskListSectionState createState() => _TaskListSectionState();
+  State<TaskListSection> createState() => _TaskListSectionState();
 }
 
 class _TaskListSectionState extends State<TaskListSection> {
