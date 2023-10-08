@@ -13,6 +13,7 @@ class TaskCreateWidget extends StatefulWidget {
 class _TaskCreateWidgetState extends State<TaskCreateWidget> {
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  TaskLifecycleType? selectedLifecycleType;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +35,22 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
           TextField(
             controller: descriptionController,
             decoration: const InputDecoration(labelText: 'Description'),
+          ),
+          const SizedBox(height: 16.0),
+          DropdownButtonFormField<TaskLifecycleType>(
+            value: selectedLifecycleType,
+            items: TaskLifecycleType.values.map((type) {
+              return DropdownMenuItem(
+                value: type,
+                child: Text(type.toString().split('.').last),
+              );
+            }).toList(),
+            decoration: const InputDecoration(labelText: 'Lifecycle Type'),
+            onChanged: (value) {
+              setState(() {
+                selectedLifecycleType = value;
+              });
+            },
           ),
           const SizedBox(height: 16.0),
           ElevatedButton(
@@ -61,7 +78,7 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
       description: description,
       createdDate: DateTime.now(),
       status: 'not completed',
-      taskLifecycleType: TaskLifecycleType.AdHoc,
+      taskLifecycleType: selectedLifecycleType!,
     );
 
     // Call the onSave callback to handle the new task
@@ -70,5 +87,8 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
     // Clear the input fields
     taskNameController.clear();
     descriptionController.clear();
+    setState(() {
+      selectedLifecycleType = null;
+    });
   }
 }
