@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:sharp_wing_frontend/models/task.dart';
+import 'package:sharp_wing_frontend/models/task_details_response.dart';
 
 class TaskService {
   final String baseApiUrl; // Replace with your API base URL
@@ -33,6 +34,29 @@ class TaskService {
       return task;
     } else {
       throw Exception('Failed to load task');
+    }
+  }
+
+  Future<TaskDetailsResponse> getTaskDetails(int taskId) async {
+    final response =
+        await http.get(Uri.parse('$baseApiUrl/api/tasks/$taskId/details'));
+
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      return TaskDetailsResponse.fromJson(jsonResponse);
+    } else {
+      throw Exception('Failed to load task details');
+    }
+  }
+
+  Future<Task> getRootTask() async {
+    final response = await http.get(Uri.parse('$baseApiUrl/api/tasks/root'));
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = json.decode(response.body);
+      return Task.fromJson(jsonResponse);
+    } else {
+      throw Exception('Failed to load root task');
     }
   }
 

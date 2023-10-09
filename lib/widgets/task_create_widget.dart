@@ -3,8 +3,12 @@ import 'package:sharp_wing_frontend/models/task.dart';
 
 class TaskCreateWidget extends StatefulWidget {
   final Function(Task createdTask) onCreateTask;
+  final int currentParentTaskId; // Add this property for the parent task's ID
 
-  const TaskCreateWidget({super.key, required this.onCreateTask});
+  const TaskCreateWidget(
+      {super.key,
+      required this.onCreateTask,
+      required this.currentParentTaskId});
 
   @override
   State<TaskCreateWidget> createState() => _TaskCreateWidgetState();
@@ -98,6 +102,7 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
     final Task newTask = Task(
       taskId: -1, // Assign a unique ID (you can generate one as needed)
       taskName: taskName,
+      parentId: widget.currentParentTaskId,
       description: description,
       createdDate: DateTime.now(),
       status: 'not completed',

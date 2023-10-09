@@ -7,6 +7,7 @@ import 'package:sharp_wing_frontend/widgets/task_create_widget.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
+import 'package:sharp_wing_frontend/models/task_details_response.dart';
 
 class TaskListScreen extends StatefulWidget {
   final TaskService taskService;
@@ -19,18 +20,33 @@ class TaskListScreen extends StatefulWidget {
 
 class _TaskListScreenState extends State<TaskListScreen> {
   List<Task> tasks = [];
+  late Task
+      currentTask; // Initialized later and should never be null afterwards.
+  List<Task> pathEnumeration = [];
 
   @override
   void initState() {
     super.initState();
-    _loadTasks();
+    _fetchRootAndLoadDetails();
   }
 
-  Future<void> _loadTasks() async {
+  Future<void> _fetchRootAndLoadDetails() async {
     try {
-      final List<Task> loadedTasks = await widget.taskService.getAllTasks();
+      var rootTask = await widget.taskService.getRootTask();
+      _loadTaskDetails(rootTask);
+    } catch (e) {
+      // Handle errors accordingly.
+    }
+  }
+
+  Future<void> _loadTaskDetails(Task taskToLoad) async {
+    try {
+      final TaskDetailsResponse taskDetails =
+          await widget.taskService.getTaskDetails(taskToLoad.taskId);
       setState(() {
-        tasks = loadedTasks;
+        currentTask = taskDetails.currentTask;
+        tasks = taskDetails.subTasks;
+        pathEnumeration = taskDetails.pathEnumeration;
       });
     } catch (e) {
       // Handle the error, e.g., show an error message to the user
@@ -63,7 +79,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
                 }).toList(),
               ),
             ),
-            TaskCreateWidget(onCreateTask: _createTask)
+            TaskCreateWidget(
+              onCreateTask: _createTask,
+              currentParentTaskId: currentTask.taskId,
+            )
           ],
         ));
   }
