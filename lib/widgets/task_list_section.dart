@@ -8,6 +8,7 @@ class TaskListSection extends StatefulWidget {
   final Function(Task editTask) onEdit;
   final Function(Task taskToDelete) onDelete;
   final Function(Task taskToUpdate, bool? newValue) onCheckboxToggle;
+  final Function(Task selectedTask) onTap;
 
   const TaskListSection(
       {super.key,
@@ -15,7 +16,8 @@ class TaskListSection extends StatefulWidget {
       required this.tasks,
       required this.onEdit,
       required this.onDelete,
-      required this.onCheckboxToggle});
+      required this.onCheckboxToggle,
+      required this.onTap});
 
   @override
   State<TaskListSection> createState() => _TaskListSectionState();
@@ -50,7 +52,9 @@ class _TaskListSectionState extends State<TaskListSection> {
                     task: task,
                     onCheckboxToggle: widget.onCheckboxToggle,
                     onEdit: widget.onEdit,
-                    onDelete: widget.onDelete, /* other required properties */
+                    onDelete: widget.onDelete,
+                    onTap: widget.onTap,
+                    cardColor: Colors.white,
                   ))
               .toList(),
       ],

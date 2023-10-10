@@ -6,6 +6,7 @@ import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
 import 'package:sharp_wing_frontend/widgets/task_create_widget.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
+import 'package:sharp_wing_frontend/widgets/current_task_display.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
 import 'package:sharp_wing_frontend/models/task_details_response.dart';
 
@@ -61,6 +62,11 @@ class _TaskListScreenState extends State<TaskListScreen> {
         ),
         body: Column(
           children: [
+            CurrentTaskDisplay(
+                currentTask: currentTask,
+                onCheckboxToggle: _toggleTaskStatus,
+                onDelete: _deleteTask,
+                onEdit: _openTaskEditorScreen),
             Expanded(
               child: ListView(
                 children: TaskLifecycleType.values.expand((type) {
@@ -73,7 +79,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
                         tasks: tasksForType,
                         onCheckboxToggle: _toggleTaskStatus,
                         onEdit: _openTaskEditorScreen,
-                        onDelete: _deleteTask),
+                        onDelete: _deleteTask,
+                        onTap: _handleTaskTap),
                     const SizedBox(height: 20.0), // Spacing between sections
                   ];
                 }).toList(),
@@ -85,6 +92,10 @@ class _TaskListScreenState extends State<TaskListScreen> {
             )
           ],
         ));
+  }
+
+  void _handleTaskTap(Task selectedTask) {
+    _loadTaskDetails(selectedTask);
   }
 
   void _openTaskEditorScreen(Task task) {
@@ -129,15 +140,30 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   Future<void> _deleteTask(Task taskToDelete) async {
     try {
+      if (taskToDelete.parentId == null) {
+        return;
+      }
+
       await widget.taskService.deleteTask(taskToDelete.taskId);
 
       if (!context.mounted) return;
 
-      setState(() {
-        tasks.remove(taskToDelete);
-      });
+      if (taskToDelete.taskId == currentTask.taskId) {
+        setState(() {
+          _navigateToParent();
+        });
+      } else {
+        setState(() {
+          tasks.remove(taskToDelete);
+        });
+      }
     } catch (exception) {
       //failed to delete task
     }
+  }
+
+  void _navigateToParent() {
+    var parentTask = pathEnumeration[pathEnumeration.length - 2];
+    _loadTaskDetails(parentTask);
   }
 }
