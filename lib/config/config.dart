@@ -7,7 +7,8 @@ class AppConfig {
 }
 
 class ProductionConfig extends AppConfig {
-  static const String baseApiUrlValue = "https://production-api.example.com";
+  static const String baseApiUrlValue =
+      "https://sharp-wing-backend-69be84f59c7d.herokuapp.com";
 
   ProductionConfig() : super(baseApiUrl: baseApiUrlValue);
 }

@@ -23,6 +23,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
   late Task
       currentTask; // Initialized later and should never be null afterwards.
   List<Task> pathEnumeration = [];
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         currentTask = taskDetails.currentTask;
         tasks = taskDetails.subTasks;
         pathEnumeration = taskDetails.pathEnumeration;
+        isLoading = false;
       });
     } catch (e) {
       // Handle the error, e.g., show an error message to the user
@@ -55,6 +57,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+          appBar: AppBar(
+            title: Text('Task List'),
+          ),
+          body: const Center(
+              child:
+                  CircularProgressIndicator()) // Show a loading indicator // Your actual task list widget
+          );
+    }
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task List'),
