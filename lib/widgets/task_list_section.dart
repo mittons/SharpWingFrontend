@@ -33,11 +33,10 @@ class _TaskListSectionState extends State<TaskListSection> {
         ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
           title: Padding(
-            padding: const EdgeInsets.only(
-                left: 0.0), // Adjust the left padding for the title
+            padding: const EdgeInsets.only(left: 0.0),
             child: Text(
               "${widget.lifecycleType.toString().split('.').last} Tasks",
-              style: const TextStyle(fontWeight: FontWeight.bold), // Bold text
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           leading: Padding(
@@ -54,7 +53,6 @@ class _TaskListSectionState extends State<TaskListSection> {
                     onEdit: widget.onEdit,
                     onDelete: widget.onDelete,
                     onTap: widget.onTap,
-                    cardColor: Colors.white,
                   ))
               .toList(),
       ],

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
-import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
+import 'package:sharp_wing_frontend/widgets/current_task_item.dart';
 
 class CurrentTaskDisplay extends StatelessWidget {
   final Task currentTask;
   final Function(Task taskToUpdate, bool? newValue) onCheckboxToggle;
   final Function(Task taskToDelete) onDelete;
   final Function(Task editTask) onEdit;
+  final Function() onBackPressed;
 
   const CurrentTaskDisplay({
     Key? key,
@@ -14,6 +15,7 @@ class CurrentTaskDisplay extends StatelessWidget {
     required this.onCheckboxToggle,
     required this.onDelete,
     required this.onEdit,
+    required this.onBackPressed,
   }) : super(key: key);
 
   @override
@@ -38,13 +40,12 @@ class CurrentTaskDisplay extends StatelessWidget {
                 child: Icon(Icons.add),
               )),
         ),
-        TaskListItem(
+        CurrentTaskItem(
           task: currentTask,
           onCheckboxToggle: onCheckboxToggle,
           onDelete: onDelete,
           onEdit: onEdit,
-          onTap: (tappedTask) {},
-          cardColor: const Color.fromRGBO(238, 238, 238, 1.0),
+          onBackPressed: onBackPressed,
         ),
       ],
     );

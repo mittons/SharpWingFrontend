@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
 import 'package:sharp_wing_frontend/widgets/task_create_widget.dart';
-import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
 import 'package:sharp_wing_frontend/widgets/current_task_display.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
@@ -57,41 +56,44 @@ class _TaskListScreenState extends State<TaskListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Task List'),
-        ),
-        body: Column(
-          children: [
-            CurrentTaskDisplay(
-                currentTask: currentTask,
-                onCheckboxToggle: _toggleTaskStatus,
-                onDelete: _deleteTask,
-                onEdit: _openTaskEditorScreen),
-            Expanded(
-              child: ListView(
-                children: TaskLifecycleType.values.expand((type) {
-                  final tasksForType = tasks
-                      .where((task) => task.taskLifecycleType == type)
-                      .toList();
-                  return [
-                    TaskListSection(
-                        lifecycleType: type,
-                        tasks: tasksForType,
-                        onCheckboxToggle: _toggleTaskStatus,
-                        onEdit: _openTaskEditorScreen,
-                        onDelete: _deleteTask,
-                        onTap: _handleTaskTap),
-                    const SizedBox(height: 20.0), // Spacing between sections
-                  ];
-                }).toList(),
-              ),
+      appBar: AppBar(
+        title: const Text('Task List'),
+      ),
+      body: Column(
+        children: [
+          CurrentTaskDisplay(
+            currentTask: currentTask,
+            onCheckboxToggle: _toggleTaskStatus,
+            onDelete: _deleteTask,
+            onEdit: _openTaskEditorScreen,
+            onBackPressed: () => _navigateToParent(),
+          ),
+          Expanded(
+            child: ListView(
+              children: TaskLifecycleType.values.expand((type) {
+                final tasksForType = tasks
+                    .where((task) => task.taskLifecycleType == type)
+                    .toList();
+                return [
+                  TaskListSection(
+                      lifecycleType: type,
+                      tasks: tasksForType,
+                      onCheckboxToggle: _toggleTaskStatus,
+                      onEdit: _openTaskEditorScreen,
+                      onDelete: _deleteTask,
+                      onTap: _handleTaskTap),
+                  const SizedBox(height: 20.0), // Spacing between sections
+                ];
+              }).toList(),
             ),
-            TaskCreateWidget(
-              onCreateTask: _createTask,
-              currentParentTaskId: currentTask.taskId,
-            )
-          ],
-        ));
+          ),
+          TaskCreateWidget(
+            onCreateTask: _createTask,
+            currentParentTaskId: currentTask.taskId,
+          )
+        ],
+      ),
+    );
   }
 
   void _handleTaskTap(Task selectedTask) {
