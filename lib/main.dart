@@ -10,7 +10,17 @@ AppConfig activeConfig = ProductionConfig();
 void main() {
   // Load configuration based on environment or configuration profile
   // Example: Set activeConfig to TestConfig for testing
-  activeConfig = DevConfig();
+  const FLAVOR = String.fromEnvironment('FLAVOR', defaultValue: 'dev');
+
+  if (FLAVOR == 'prod') {
+    activeConfig = ProductionConfig();
+  } else if (FLAVOR == 'test') {
+    activeConfig = TestConfig();
+  } else {
+    activeConfig = DevConfig();
+  }
+  print(activeConfig.baseApiUrl);
+
   runApp(TaskListApp(config: activeConfig));
 }
 
