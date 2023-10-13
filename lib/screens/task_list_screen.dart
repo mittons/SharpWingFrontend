@@ -63,8 +63,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
             title: Text('Task List'),
           ),
           body: const Center(
-              child:
-                  CircularProgressIndicator()) // Show a loading indicator // Your actual task list widget
+              child: CircularProgressIndicator()) // Show a loading indicator
           );
     }
     return Scaffold(

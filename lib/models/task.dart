@@ -15,7 +15,7 @@ class Task {
 
   Task({
     required this.taskId,
-    this.parentId,
+    required this.parentId,
     required this.taskName,
     required this.description,
     required this.createdDate,

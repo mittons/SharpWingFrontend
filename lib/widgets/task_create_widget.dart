@@ -17,7 +17,7 @@ class TaskCreateWidget extends StatefulWidget {
 class _TaskCreateWidgetState extends State<TaskCreateWidget> {
   final TextEditingController taskNameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
-  TaskLifecycleType? selectedLifecycleType;
+  TaskLifecycleType selectedLifecycleType = TaskLifecycleType.Setup;
 
   bool _isExpanded = false;
 
@@ -68,7 +68,7 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
               decoration: const InputDecoration(labelText: 'Lifecycle Type'),
               onChanged: (value) {
                 setState(() {
-                  selectedLifecycleType = value;
+                  selectedLifecycleType = value!;
                 });
               },
             ),
@@ -115,8 +115,8 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
     // Clear the input fields
     taskNameController.clear();
     descriptionController.clear();
-    setState(() {
-      selectedLifecycleType = null;
-    });
+    // setState(() {
+    //   selectedLifecycleType = null;
+    // });
   }
 }

@@ -61,6 +61,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
     // Update task data
     final updatedTask = Task(
       taskId: widget.task.taskId,
+      parentId: widget.task.parentId,
       taskName: taskNameController.text,
       description: descriptionController.text,
       createdDate: widget.task.createdDate,
