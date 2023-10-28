@@ -19,7 +19,7 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  List<Task> tasks = [];
+  List<Task> subtasks = [];
   late Task
       currentTask; // Initialized later and should never be null afterwards.
   List<Task> pathEnumeration = [];
@@ -46,7 +46,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           await widget.taskService.getTaskDetails(taskToLoad.taskId);
       setState(() {
         currentTask = taskDetails.currentTask;
-        tasks = taskDetails.subTasks;
+        subtasks = taskDetails.subTasks;
         pathEnumeration = taskDetails.pathEnumeration;
         isLoading = false;
       });
@@ -82,7 +82,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           Expanded(
             child: ListView(
               children: TaskLifecycleType.values.expand((type) {
-                final tasksForType = tasks
+                final tasksForType = subtasks
                     .where((task) => task.taskLifecycleType == type)
                     .toList();
                 return [
@@ -120,10 +120,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
           onSave: (updatedTask) {
             // Update the task in the original list of tasks
             setState(() {
-              int index =
-                  tasks.indexWhere((task) => task.taskId == updatedTask.taskId);
-              if (index != -1) {
-                tasks[index] = updatedTask;
+              if (currentTask.taskId == updatedTask.taskId) {
+                currentTask = updatedTask;
+              } else {
+                int index = subtasks
+                    .indexWhere((task) => task.taskId == updatedTask.taskId);
+                //Ensure the task being updated is either the current task or in the list of subtasks
+                assert(index != -1);
+                if (index != -1) {
+                  subtasks[index] = updatedTask;
+                }
               }
             });
           },
@@ -147,7 +153,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     if (!context.mounted) return;
 
     setState(() {
-      tasks.add(createdTaskFromApi);
+      subtasks.add(createdTaskFromApi);
     });
   }
 
@@ -167,7 +173,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
         });
       } else {
         setState(() {
-          tasks.remove(taskToDelete);
+          subtasks.remove(taskToDelete);
         });
       }
     } catch (exception) {
