@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
+import 'package:sharp_wing_frontend/services/task_service_result.dart';
 import 'package:sharp_wing_frontend/widgets/task_create_widget.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
 import 'package:sharp_wing_frontend/widgets/current_task_display.dart';
@@ -19,7 +20,7 @@ class TaskListScreen extends StatefulWidget {
 }
 
 class _TaskListScreenState extends State<TaskListScreen> {
-  List<Task> tasks = [];
+  List<Task> subtasks = [];
   late Task
       currentTask; // Initialized later and should never be null afterwards.
   List<Task> pathEnumeration = [];
@@ -31,36 +32,43 @@ class _TaskListScreenState extends State<TaskListScreen> {
     _fetchRootAndLoadDetails();
   }
 
+  //TODO: Backlog - Setup handling of unsuccessful TaskService result
   Future<void> _fetchRootAndLoadDetails() async {
-    try {
-      var rootTask = await widget.taskService.getRootTask();
+    TaskServiceResult result = await widget.taskService.getRootTask();
+    if (result.success) {
+      Task rootTask = result.data;
       _loadTaskDetails(rootTask);
-    } catch (e) {
-      // Handle errors accordingly.
+    } else {
+      //handle unsuccessful fetch of root task
     }
   }
 
+  //TODO: Backlog - Setup handling of unsuccessful TaskService result
   Future<void> _loadTaskDetails(Task taskToLoad) async {
-    try {
-      final TaskDetailsResponse taskDetails =
-          await widget.taskService.getTaskDetails(taskToLoad.taskId);
+    TaskServiceResult result =
+        await widget.taskService.getTaskDetails(taskToLoad.taskId);
+
+    if (result.success) {
+      final TaskDetailsResponse taskDetails = result.data;
+
       setState(() {
         currentTask = taskDetails.currentTask;
-        tasks = taskDetails.subTasks;
+        subtasks = taskDetails.subTasks;
         pathEnumeration = taskDetails.pathEnumeration;
         isLoading = false;
       });
-    } catch (e) {
-      // Handle the error, e.g., show an error message to the user
+    } else {
+      //handle unsuccessful fetch of task details response
     }
   }
 
+  //TODO: fix so that edit task function also allows for edits on the current task
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
           appBar: AppBar(
-            title: Text('Task List'),
+            title: const Text('Task List'),
           ),
           body: const Center(
               child: CircularProgressIndicator()) // Show a loading indicator
@@ -82,7 +90,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
           Expanded(
             child: ListView(
               children: TaskLifecycleType.values.expand((type) {
-                final tasksForType = tasks
+                final tasksForType = subtasks
                     .where((task) => task.taskLifecycleType == type)
                     .toList();
                 return [
@@ -120,10 +128,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
           onSave: (updatedTask) {
             // Update the task in the original list of tasks
             setState(() {
-              int index =
-                  tasks.indexWhere((task) => task.taskId == updatedTask.taskId);
-              if (index != -1) {
-                tasks[index] = updatedTask;
+              if (currentTask.taskId == updatedTask.taskId) {
+                currentTask = updatedTask;
+              } else {
+                int index = subtasks
+                    .indexWhere((task) => task.taskId == updatedTask.taskId);
+                //Ensure the task being updated is either the current task or in the list of subtasks
+                assert(index != -1);
+                if (index != -1) {
+                  subtasks[index] = updatedTask;
+                }
               }
             });
           },
@@ -132,51 +146,117 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  //TODO: Clean code thats commented out
+  //TODO: Backlog - Setup handling of unsuccessful TaskService result
   Future<void> _toggleTaskStatus(Task taskToUpdate, newValue) async {
+    var oldStatusValue = taskToUpdate.status;
+
     taskToUpdate.status = newValue! ? 'completed' : 'not completed';
-    widget.taskService.updateTask(taskToUpdate.taskId, taskToUpdate);
+
+    TaskServiceResult result =
+        await widget.taskService.updateTask(taskToUpdate.taskId, taskToUpdate);
 
     if (!context.mounted) return;
 
-    setState(() {});
+    if (result.success) {
+      //Ensure the list of tasks this screen displays contains the task item (with the updated info)
+      //  and if not then it should be the current task displayed in this screen.
+      //Could be triggered if the caller of this function sent us a new instance of a task object.
+      //If that happens we can extend this code to look for task by id and make edits to that task
+      //  (and assert that there exists a task with equal id).
+      assert(subtasks.contains(taskToUpdate) || currentTask == taskToUpdate);
+
+      setState(() {});
+    } else {
+      taskToUpdate.status = oldStatusValue;
+      //handle unsuccessful update
+    }
+
+    // _showSnackbar();
+    // _showDialog();
   }
 
+  //TODO: Backlog - Setup handling of unsuccessful TaskService result
   Future<void> _createTask(Task createdTask) async {
-    Task createdTaskFromApi = await widget.taskService.createTask(createdTask);
+    TaskServiceResult result = await widget.taskService.createTask(createdTask);
 
     if (!context.mounted) return;
 
-    setState(() {
-      tasks.add(createdTaskFromApi);
-    });
+    if (result.success) {
+      Task createdTaskFromApi = result.data;
+
+      setState(() {
+        subtasks.add(createdTaskFromApi);
+      });
+    } else {
+      //handle unsuccessful task creation
+    }
   }
 
+  //TODO: Backlog - Setup handling of unsuccessful TaskService result
   Future<void> _deleteTask(Task taskToDelete) async {
-    try {
-      if (taskToDelete.parentId == null) {
-        return;
-      }
+    if (taskToDelete.parentId == null) {
+      return;
+    }
 
-      await widget.taskService.deleteTask(taskToDelete.taskId);
+    //Ensure the list of tasks this screen displays contains the task item to be deleted
+    //  and if not then it should be the current task displayed on this screen.
+    //Could be triggered in the future if the caller of this function sent us a new instance of a task object
+    assert(subtasks.contains(taskToDelete) || currentTask == taskToDelete);
 
-      if (!context.mounted) return;
+    TaskServiceResult result =
+        await widget.taskService.deleteTask(taskToDelete.taskId);
 
+    if (!context.mounted) return;
+
+    if (result.success) {
       if (taskToDelete.taskId == currentTask.taskId) {
         setState(() {
           _navigateToParent();
         });
       } else {
         setState(() {
-          tasks.remove(taskToDelete);
+          subtasks.remove(taskToDelete);
         });
       }
-    } catch (exception) {
-      //failed to delete task
+    } else {
+      //handle unsuccessful delete
     }
   }
 
   void _navigateToParent() {
     var parentTask = pathEnumeration[pathEnumeration.length - 2];
     _loadTaskDetails(parentTask);
+  }
+
+  //TODO: Remove or rework
+  void _showSnackbar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('This is an error message'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  //TODO: Remove or rework
+  void _showDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text('Critical error message'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
