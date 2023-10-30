@@ -19,7 +19,6 @@ void main() {
   } else {
     activeConfig = DevConfig();
   }
-  print(activeConfig.baseApiUrl);
 
   runApp(TaskListApp(config: activeConfig));
 }

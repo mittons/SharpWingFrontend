@@ -129,7 +129,7 @@ class _TaskCreateWidgetState extends State<TaskCreateWidget> {
         description: description,
         createdDate: DateTime.now(),
         status: 'not completed',
-        taskLifecycleType: selectedLifecycleType!,
+        taskLifecycleType: selectedLifecycleType,
       );
 
       // Call the onSave callback to handle the new task
