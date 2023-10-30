@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
+import 'package:sharp_wing_frontend/services/task_service_result.dart';
 
 class TaskEditScreen extends StatefulWidget {
   final Task task;
@@ -57,6 +58,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
     );
   }
 
+  //Todo: display snackbar
   Future<void> _updateTask() async {
     // Update task data
     final updatedTask = Task(
@@ -69,18 +71,18 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
       taskLifecycleType: widget.task.taskLifecycleType,
     );
 
-    try {
-      await widget.taskService.updateTask(widget.task.taskId, updatedTask);
+    TaskServiceResult result =
+        await widget.taskService.updateTask(widget.task.taskId, updatedTask);
 
+    if (result.success) {
       // Task updated successfully, call the onSave callback
       widget.onSave(updatedTask);
 
       if (!context.mounted) return;
 
       Navigator.pop(context);
-    } catch (exception) {
-      // Failed to edit task
-      // Consider showing an error message or handle accordingly
+    } else {
+      //handle unsuccessful task update
     }
   }
 }

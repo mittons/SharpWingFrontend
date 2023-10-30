@@ -2,13 +2,17 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/models/task_details_response.dart';
+import 'package:sharp_wing_frontend/services/task_service_result.dart';
 
 class TaskService {
   final String baseApiUrl; // Replace with your API base URL
 
   TaskService({required this.baseApiUrl});
 
-  Future<List<Task>> getAllTasks() async {
+  //TODO: Clean commented code
+  //TODO: Log http status code
+  //TODO: Log exceptions
+  Future<TaskServiceResult<List<Task>>> getAllTasks() async {
     try {
       final response = await http.get(Uri.parse('$baseApiUrl/api/tasks'));
 
@@ -18,18 +22,22 @@ class TaskService {
         final List<Task> tasks = jsonResponse
             .map((taskJson) => Task.fromJson(taskJson as Map<String, dynamic>))
             .toList();
-        return tasks;
+
+        return TaskServiceResult(data: tasks, success: true);
       } else {
-        // If the server did not return a 200 OK response,
-        // throw an exception or handle the error as needed.
-        throw Exception('Failed to load tasks');
+        //response code handling (response.statusCode)
+        return TaskServiceResult(data: null, success: false);
       }
     } catch (e) {
-      throw e;
+      //log exceptions
+      return TaskServiceResult(data: null, success: false);
     }
   }
 
-  Future<Task> getTaskById(int taskId) async {
+  //TODO: Clean commented code
+  //TODO: Log http status code
+  //TODO: Log exceptions
+  Future<TaskServiceResult<Task>> getTaskById(int taskId) async {
     try {
       final response =
           await http.get(Uri.parse('$baseApiUrl/api/tasks/$taskId'));
@@ -37,47 +45,67 @@ class TaskService {
       if (response.statusCode == 200) {
         final dynamic jsonResponse = json.decode(response.body);
         final Task task = Task.fromJson(jsonResponse as Map<String, dynamic>);
-        return task;
+
+        return TaskServiceResult(data: task, success: true);
       } else {
-        throw Exception('Failed to load task');
+        //response code handling (response.statusCode)
+        return TaskServiceResult(data: null, success: false);
       }
     } catch (e) {
-      throw e;
+      //log exceptions
+      return TaskServiceResult(data: null, success: false);
     }
   }
 
-  Future<TaskDetailsResponse> getTaskDetails(int taskId) async {
+  //TODO: Clean commented code
+  //TODO: Log http status code
+  //TODO: Log exceptions
+  Future<TaskServiceResult<TaskDetailsResponse>> getTaskDetails(
+      int taskId) async {
     try {
       final response =
           await http.get(Uri.parse('$baseApiUrl/api/tasks/$taskId/details'));
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-        return TaskDetailsResponse.fromJson(jsonResponse);
+
+        return TaskServiceResult(
+            data: TaskDetailsResponse.fromJson(jsonResponse), success: true);
       } else {
-        throw Exception('Failed to load task details');
+        //response code handling (response.statusCode)
+        return TaskServiceResult(data: null, success: false);
       }
     } catch (e) {
-      throw e;
+      //log exception
+      return TaskServiceResult(data: null, success: false);
     }
   }
 
-  Future<Task> getRootTask() async {
+  //TODO: Clean commented code
+  //TODO: Log http status code
+  //TODO: Log exceptions
+  Future<TaskServiceResult<Task>> getRootTask() async {
     try {
       final response = await http.get(Uri.parse('$baseApiUrl/api/tasks/root'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        return Task.fromJson(jsonResponse);
+        return TaskServiceResult(
+            data: Task.fromJson(jsonResponse), success: true);
       } else {
-        throw Exception('Failed to load root task');
+        //response code handling (response.statusCode)
+        return TaskServiceResult(data: null, success: false);
       }
     } catch (e) {
-      throw e;
+      //log exceptions
+      return TaskServiceResult(data: null, success: false);
     }
   }
 
-  Future<Task> createTask(Task task) async {
+  //TODO: Clean commented code
+  //TODO: Log http status code
+  //TODO: Log exceptions
+  Future<TaskServiceResult<Task>> createTask(Task task) async {
     try {
       final response = await http.post(
         Uri.parse('$baseApiUrl/api/tasks'),
@@ -89,16 +117,23 @@ class TaskService {
         final dynamic jsonResponse = json.decode(response.body);
         final Task createdTask =
             Task.fromJson(jsonResponse as Map<String, dynamic>);
-        return createdTask;
+
+        return TaskServiceResult(data: createdTask, success: true);
       } else {
-        throw Exception('Failed to create task');
+        //response code handling (response.statusCode)
+        return TaskServiceResult(data: null, success: false);
       }
     } catch (e) {
-      throw e;
+      //log exceptions
+      return TaskServiceResult(data: null, success: false);
     }
   }
 
-  Future<void> updateTask(int taskId, Task updatedTask) async {
+  //TODO: Clean commented code
+  //TODO: Log http status code
+  //TODO: Log exceptions
+  Future<TaskServiceResult<NoContent>> updateTask(
+      int taskId, Task updatedTask) async {
     try {
       final response = await http.put(
         Uri.parse('$baseApiUrl/api/tasks/$taskId'),
@@ -107,24 +142,35 @@ class TaskService {
       );
 
       if (response.statusCode != 204) {
-        print('Failed to update task: ${response.statusCode}');
-        throw Exception('Failed to update task');
+        //print('Failed to update task: ${response.statusCode}');
+        //throw Exception('Failed to update task');
+        return TaskServiceResult(data: null, success: false);
       }
+
+      return TaskServiceResult(data: null, success: true);
     } catch (e) {
-      throw e;
+      //log exceptions
+      return TaskServiceResult(data: null, success: false);
     }
   }
 
-  Future<void> deleteTask(int taskId) async {
+  //TODO: Clean commented code
+  //TODO: Log http status code
+  //TODO: Log exceptions
+  Future<TaskServiceResult<NoContent>> deleteTask(int taskId) async {
     try {
       final response =
           await http.delete(Uri.parse('$baseApiUrl/api/tasks/$taskId'));
 
       if (response.statusCode != 204) {
-        throw Exception('Failed to delete task');
+        //print('Failed to delete task: ${response.statusCode}');
+        return TaskServiceResult(data: null, success: false);
       }
+
+      return TaskServiceResult(data: null, success: true);
     } catch (e) {
-      throw e;
+      //log exceptions
+      return TaskServiceResult(data: null, success: false);
     }
   }
 }

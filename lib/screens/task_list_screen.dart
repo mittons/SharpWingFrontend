@@ -8,6 +8,7 @@ import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
 import 'package:sharp_wing_frontend/widgets/current_task_display.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
 import 'package:sharp_wing_frontend/models/task_details_response.dart';
+import 'package:sharp_wing_frontend/services/task_service_result.dart';
 
 class TaskListScreen extends StatefulWidget {
   final TaskService taskService;
@@ -31,28 +32,36 @@ class _TaskListScreenState extends State<TaskListScreen> {
     _fetchRootAndLoadDetails();
   }
 
+  //TODO: here
   Future<void> _fetchRootAndLoadDetails() async {
-    try {
-      var rootTask = await widget.taskService.getRootTask();
-      _loadTaskDetails(rootTask);
-    } catch (e) {
-      // Handle errors accordingly.
-    }
+    TaskServiceResult result = await widget.taskService.getRootTask();
+
+    if (!result.success) {}
+
+    Task rootTask = result.data;
+    _loadTaskDetails(rootTask);
   }
 
+  //TODO: display snackbar
   Future<void> _loadTaskDetails(Task taskToLoad) async {
-    try {
-      final TaskDetailsResponse taskDetails =
-          await widget.taskService.getTaskDetails(taskToLoad.taskId);
-      setState(() {
-        currentTask = taskDetails.currentTask;
-        subtasks = taskDetails.subTasks;
-        pathEnumeration = taskDetails.pathEnumeration;
-        isLoading = false;
-      });
-    } catch (e) {
-      // Handle the error, e.g., show an error message to the user
+    TaskServiceResult result =
+        await widget.taskService.getTaskDetails(taskToLoad.taskId);
+
+    if (!context.mounted) return;
+
+    if (!result.success) {
+      //todo display snackbar
+      return;
     }
+
+    final TaskDetailsResponse taskDetails = result.data;
+
+    setState(() {
+      currentTask = taskDetails.currentTask;
+      subtasks = taskDetails.subTasks;
+      pathEnumeration = taskDetails.pathEnumeration;
+      isLoading = false;
+    });
   }
 
   @override
@@ -138,35 +147,66 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
+  //TODO: display snackbar error message
   Future<void> _toggleTaskStatus(Task taskToUpdate, newValue) async {
+    var oldStatusValue = taskToUpdate.status;
+
     taskToUpdate.status = newValue! ? 'completed' : 'not completed';
-    widget.taskService.updateTask(taskToUpdate.taskId, taskToUpdate);
+
+    TaskServiceResult result =
+        await widget.taskService.updateTask(taskToUpdate.taskId, taskToUpdate);
 
     if (!context.mounted) return;
 
-    setState(() {});
+    if (result.success) {
+      //Ensure the list of tasks this screen displays contains the task item (with the updated info)
+      //  and if not then it should be the current task displayed in this screen.
+      //Could be triggered if the caller of this function sent us a new instance of a task object.
+      //If that happens we can extend this code to look for task by id and make edits to that task
+      //  (and assert that there exists a task with equal id).
+      assert(subtasks.contains(taskToUpdate) || currentTask == taskToUpdate);
+
+      setState(() {});
+    } else {
+      taskToUpdate.status = oldStatusValue;
+      //todo display snackbar
+    }
   }
 
+  //TODO: display snackbar
   Future<void> _createTask(Task createdTask) async {
-    Task createdTaskFromApi = await widget.taskService.createTask(createdTask);
+    TaskServiceResult result = await widget.taskService.createTask(createdTask);
 
     if (!context.mounted) return;
 
-    setState(() {
-      subtasks.add(createdTaskFromApi);
-    });
+    if (result.success) {
+      Task createdTaskFromApi = result.data;
+
+      setState(() {
+        subtasks.add(createdTaskFromApi);
+      });
+    } else {
+      //todo display snackbar
+    }
   }
 
+  //TODO: display snackbar
   Future<void> _deleteTask(Task taskToDelete) async {
-    try {
-      if (taskToDelete.parentId == null) {
-        return;
-      }
+    if (taskToDelete.parentId == null) {
+      return;
+    }
 
-      await widget.taskService.deleteTask(taskToDelete.taskId);
+    //Ensure the list of tasks this screen displays contains the task item to be deleted
+    //  and if not then it should be the current task displayed on this screen.
+    //Could be triggered in the future if the caller of this function sent us a new instance of a task object
+    assert(subtasks.contains(taskToDelete) || currentTask == taskToDelete);
 
-      if (!context.mounted) return;
+    TaskServiceResult result =
+        await widget.taskService.deleteTask(taskToDelete.taskId);
 
+    if (!context.mounted) return;
+
+    if (result.success) {
       if (taskToDelete.taskId == currentTask.taskId) {
         setState(() {
           _navigateToParent();
@@ -176,8 +216,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
           subtasks.remove(taskToDelete);
         });
       }
-    } catch (exception) {
-      //failed to delete task
+    } else {
+      //todo show user snackbar
     }
   }
 
