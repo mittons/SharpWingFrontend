@@ -1,0 +1,59 @@
+name: Flutter CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.9.0' # specify the Node version
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.13.7' # specify the Flutter version
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build Flutter Web
+      run: flutter build web --release --dart-define=FLAVOR=prod --base-href /SharpWingFront/
+
+    - name: Deploy to gh-pages
+      run: |
+        # Moving to build/web where the build artifacts are
+
+        cd build/web
+        
+        # Initialize a new Git repository inside the build folder, 
+        # Our workspace already has a .git directory and we are essentially working with a fresh, separate repository now.
+        git init
+        
+        
+        # Set name and email of the user interacting with git
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+        
+        git add .
+        git commit -m 'Deploy to gh-pages'
+
+        # Add the github repository as a remote
+        git remote add gh-token "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+
+        # Force push from the current repo's master branch to the remote
+        # repo's gh-pages branch. (All previous history on the gh-pages
+        # branch will be lost, since we are overwriting it.)
+        # This is ok snice github is not a version control system for builds but a version control system for code
+        git push gh-token HEAD:gh-pages --force
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # This token is provided by Actions, you do not need to create your own token
