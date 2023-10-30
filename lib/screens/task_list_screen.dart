@@ -36,7 +36,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
   Future<void> _fetchRootAndLoadDetails() async {
     TaskServiceResult result = await widget.taskService.getRootTask();
 
-    if (!result.success) {}
+    if (!result.success) {
+      //todo offer retry dialog
+    }
 
     Task rootTask = result.data;
     _loadTaskDetails(rootTask);
@@ -81,31 +83,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
       ),
       body: Column(
         children: [
-          CurrentTaskDisplay(
-            currentTask: currentTask,
-            onCheckboxToggle: _toggleTaskStatus,
-            onDelete: _deleteTask,
-            onEdit: _openTaskEditorScreen,
-            onBackPressed: () => _navigateToParent(),
-          ),
+          _buildCurrentTaskDisplay(),
           Expanded(
-            child: ListView(
-              children: TaskLifecycleType.values.expand((type) {
-                final tasksForType = subtasks
-                    .where((task) => task.taskLifecycleType == type)
-                    .toList();
-                return [
-                  TaskListSection(
-                      lifecycleType: type,
-                      tasks: tasksForType,
-                      onCheckboxToggle: _toggleTaskStatus,
-                      onEdit: _openTaskEditorScreen,
-                      onDelete: _deleteTask,
-                      onTap: _handleTaskTap),
-                  const SizedBox(height: 20.0), // Spacing between sections
-                ];
-              }).toList(),
-            ),
+            child: _buildSubTasksListView(),
           ),
           TaskCreateWidget(
             onCreateTask: _createTask,
@@ -113,6 +93,35 @@ class _TaskListScreenState extends State<TaskListScreen> {
           )
         ],
       ),
+    );
+  }
+
+  Widget _buildCurrentTaskDisplay() {
+    return CurrentTaskDisplay(
+      currentTask: currentTask,
+      onCheckboxToggle: _toggleTaskStatus,
+      onDelete: _deleteTask,
+      onEdit: _openTaskEditorScreen,
+      onBackPressed: () => _navigateToParent(),
+    );
+  }
+
+  Widget _buildSubTasksListView() {
+    return ListView(
+      children: TaskLifecycleType.values.expand((type) {
+        final tasksForType =
+            subtasks.where((task) => task.taskLifecycleType == type).toList();
+        return [
+          TaskListSection(
+              lifecycleType: type,
+              tasks: tasksForType,
+              onCheckboxToggle: _toggleTaskStatus,
+              onEdit: _openTaskEditorScreen,
+              onDelete: _deleteTask,
+              onTap: _handleTaskTap),
+          const SizedBox(height: 20.0), // Spacing between sections
+        ];
+      }).toList(),
     );
   }
 
