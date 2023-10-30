@@ -1,2 +1,0 @@
-ChatGPT - Discussion mainly on tests. (Also some comments on a maintainable, scaleable and reliable codebase around the midpoint.)
-    https://chat.openai.com/share/bf20298f-11f3-4335-b73e-a826c262d426
