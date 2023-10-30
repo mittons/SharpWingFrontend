@@ -1,6 +1,7 @@
 // lib/screens/task_list.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/screens/task_edit_screen.dart';
 import 'package:sharp_wing_frontend/services/task_service_result.dart';
@@ -9,6 +10,7 @@ import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
 import 'package:sharp_wing_frontend/widgets/current_task_display.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
 import 'package:sharp_wing_frontend/models/task_details_response.dart';
+import 'package:sharp_wing_frontend/helpers/ui_helper.dart';
 
 class TaskListScreen extends StatefulWidget {
   final TaskService taskService;
@@ -35,18 +37,77 @@ class _TaskListScreenState extends State<TaskListScreen> {
   //TODO: Backlog - Setup handling of unsuccessful TaskService result
   Future<void> _fetchRootAndLoadDetails() async {
     TaskServiceResult result = await widget.taskService.getRootTask();
-    if (result.success) {
-      Task rootTask = result.data;
-      _loadTaskDetails(rootTask);
-    } else {
-      //handle unsuccessful fetch of root task
+
+    if (!context.mounted) return;
+
+    if (!result.success) {
+      while (true) {
+        bool shouldRetry = await UiHelper.showRetryOrCancelDialog(
+          context: context,
+          title: "Error",
+          message: "Failed to load home task. Service error.",
+        );
+
+        if (!context.mounted) return;
+
+        if (!shouldRetry) {
+          Navigator.pop(context);
+          return;
+        }
+
+        if (shouldRetry) {
+          result = await widget.taskService.getRootTask();
+
+          if (!context.mounted) return;
+
+          if (result.success) {
+            break;
+          }
+        }
+      }
+    }
+
+    assert(result.success);
+
+    Task rootTask = result.data;
+
+    //load tasklist
+    bool subTaskLoadSuccess = await _loadTaskDetails(rootTask);
+
+    if (!subTaskLoadSuccess) {
+      while (true) {
+        bool shouldRetry = await UiHelper.showRetryOrCancelDialog(
+          context: context,
+          title: "Error",
+          message: "Failed to load task list. Service error.",
+        );
+
+        if (!context.mounted) return;
+
+        if (!shouldRetry) {
+          Navigator.pop(context);
+          return;
+        }
+
+        if (shouldRetry) {
+          subTaskLoadSuccess = await _loadTaskDetails(rootTask);
+
+          if (!context.mounted) return;
+
+          if (result.success) {
+            break;
+          }
+        }
+      }
     }
   }
 
   //TODO: Backlog - Setup handling of unsuccessful TaskService result
-  Future<void> _loadTaskDetails(Task taskToLoad) async {
+  Future<bool> _loadTaskDetails(Task taskToLoad) async {
     TaskServiceResult result =
         await widget.taskService.getTaskDetails(taskToLoad.taskId);
+
+    if (!context.mounted) return false;
 
     if (result.success) {
       final TaskDetailsResponse taskDetails = result.data;
@@ -57,12 +118,16 @@ class _TaskListScreenState extends State<TaskListScreen> {
         pathEnumeration = taskDetails.pathEnumeration;
         isLoading = false;
       });
+      bool success = true;
+      return success;
     } else {
-      //handle unsuccessful fetch of task details response
+      UiHelper.displaySnackbar(
+          context, "Failed to expand task. Service error.");
+      bool success = false;
+      return success;
     }
   }
 
-  //TODO: fix so that edit task function also allows for edits on the current task
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -80,38 +145,43 @@ class _TaskListScreenState extends State<TaskListScreen> {
       ),
       body: Column(
         children: [
-          CurrentTaskDisplay(
-            currentTask: currentTask,
-            onCheckboxToggle: _toggleTaskStatus,
-            onDelete: _deleteTask,
-            onEdit: _openTaskEditorScreen,
-            onBackPressed: () => _navigateToParent(),
-          ),
-          Expanded(
-            child: ListView(
-              children: TaskLifecycleType.values.expand((type) {
-                final tasksForType = subtasks
-                    .where((task) => task.taskLifecycleType == type)
-                    .toList();
-                return [
-                  TaskListSection(
-                      lifecycleType: type,
-                      tasks: tasksForType,
-                      onCheckboxToggle: _toggleTaskStatus,
-                      onEdit: _openTaskEditorScreen,
-                      onDelete: _deleteTask,
-                      onTap: _handleTaskTap),
-                  const SizedBox(height: 20.0), // Spacing between sections
-                ];
-              }).toList(),
-            ),
-          ),
+          _buildCurrentTaskDisplay(),
+          Expanded(child: _buildSubTasksListView()),
           TaskCreateWidget(
             onCreateTask: _createTask,
             currentParentTaskId: currentTask.taskId,
           )
         ],
       ),
+    );
+  }
+
+  Widget _buildCurrentTaskDisplay() {
+    return CurrentTaskDisplay(
+      currentTask: currentTask,
+      onCheckboxToggle: _toggleTaskStatus,
+      onDelete: _deleteTask,
+      onEdit: _openTaskEditorScreen,
+      onBackPressed: () => _navigateToParent(),
+    );
+  }
+
+  Widget _buildSubTasksListView() {
+    return ListView(
+      children: TaskLifecycleType.values.expand((type) {
+        final tasksForType =
+            subtasks.where((task) => task.taskLifecycleType == type).toList();
+        return [
+          TaskListSection(
+              lifecycleType: type,
+              tasks: tasksForType,
+              onCheckboxToggle: _toggleTaskStatus,
+              onEdit: _openTaskEditorScreen,
+              onDelete: _deleteTask,
+              onTap: _handleTaskTap),
+          const SizedBox(height: 20.0), // Spacing between sections
+        ];
+      }).toList(),
     );
   }
 
@@ -146,8 +216,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  //TODO: Clean code thats commented out
-  //TODO: Backlog - Setup handling of unsuccessful TaskService result
+  //TODO: Backlog - Review error message
   Future<void> _toggleTaskStatus(Task taskToUpdate, newValue) async {
     var oldStatusValue = taskToUpdate.status;
 
@@ -169,14 +238,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
       setState(() {});
     } else {
       taskToUpdate.status = oldStatusValue;
-      //handle unsuccessful update
+      UiHelper.displaySnackbar(
+          context, "Failed to change task status. Service error.");
     }
-
-    // _showSnackbar();
-    // _showDialog();
   }
 
-  //TODO: Backlog - Setup handling of unsuccessful TaskService result
+  //TODO: Backlog - Review error message
   Future<void> _createTask(Task createdTask) async {
     TaskServiceResult result = await widget.taskService.createTask(createdTask);
 
@@ -189,11 +256,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
         subtasks.add(createdTaskFromApi);
       });
     } else {
-      //handle unsuccessful task creation
+      UiHelper.displaySnackbar(
+          context, "Failed to create task. Service error.");
     }
   }
 
-  //TODO: Backlog - Setup handling of unsuccessful TaskService result
+  //TODO: Backlog - Review error message
   Future<void> _deleteTask(Task taskToDelete) async {
     if (taskToDelete.parentId == null) {
       return;
@@ -220,43 +288,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
         });
       }
     } else {
-      //handle unsuccessful delete
+      UiHelper.displaySnackbar(
+          context, "Failed to delete task. Service error.");
     }
   }
 
   void _navigateToParent() {
     var parentTask = pathEnumeration[pathEnumeration.length - 2];
     _loadTaskDetails(parentTask);
-  }
-
-  //TODO: Remove or rework
-  void _showSnackbar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('This is an error message'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  //TODO: Remove or rework
-  void _showDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Error'),
-          content: Text('Critical error message'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 }
