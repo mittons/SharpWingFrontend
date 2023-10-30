@@ -9,6 +9,7 @@ import 'package:sharp_wing_frontend/widgets/current_task_display.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
 import 'package:sharp_wing_frontend/models/task_details_response.dart';
 import 'package:sharp_wing_frontend/services/task_service_result.dart';
+import 'package:sharp_wing_frontend/helpers/ui_helper.dart';
 
 class TaskListScreen extends StatefulWidget {
   final TaskService taskService;
@@ -32,28 +33,52 @@ class _TaskListScreenState extends State<TaskListScreen> {
     _fetchRootAndLoadDetails();
   }
 
-  //TODO: here
+  //TODO: testing
   Future<void> _fetchRootAndLoadDetails() async {
     TaskServiceResult result = await widget.taskService.getRootTask();
+    if (!context.mounted) return;
 
-    if (!result.success) {
-      //todo offer retry dialog
+    while (!result.success) {
+      await UiHelper.showRetryDialog(
+        context: context,
+        title: "Error",
+        message: "Failed to load home task. Service error.",
+      );
+      if (!context.mounted) return;
+
+      result = await widget.taskService.getRootTask();
+      if (!context.mounted) return;
     }
 
     Task rootTask = result.data;
-    _loadTaskDetails(rootTask);
+    bool loadTaskDetailsSuccess = false;
+    while (!loadTaskDetailsSuccess) {
+      loadTaskDetailsSuccess = await _loadTaskDetails(rootTask);
+      if (!context.mounted) return;
+
+      if (!loadTaskDetailsSuccess) {
+        await UiHelper.showRetryDialog(
+          context: context,
+          title: "Error",
+          message: "Failed to load task list. Service error.",
+        );
+        if (!context.mounted) return;
+      }
+    }
   }
 
-  //TODO: display snackbar
-  Future<void> _loadTaskDetails(Task taskToLoad) async {
+  //TODO: testing
+  Future<bool> _loadTaskDetails(Task taskToLoad) async {
     TaskServiceResult result =
         await widget.taskService.getTaskDetails(taskToLoad.taskId);
 
-    if (!context.mounted) return;
+    if (!context.mounted) return false;
 
     if (!result.success) {
-      //todo display snackbar
-      return;
+      UiHelper.displaySnackbar(
+          context, "Failed to expand task. Service error.");
+      bool success = false;
+      return success;
     }
 
     final TaskDetailsResponse taskDetails = result.data;
@@ -64,6 +89,9 @@ class _TaskListScreenState extends State<TaskListScreen> {
       pathEnumeration = taskDetails.pathEnumeration;
       isLoading = false;
     });
+
+    bool success = true;
+    return success;
   }
 
   @override
@@ -156,7 +184,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     );
   }
 
-  //TODO: display snackbar error message
+  //TODO: testing
   Future<void> _toggleTaskStatus(Task taskToUpdate, newValue) async {
     var oldStatusValue = taskToUpdate.status;
 
@@ -178,11 +206,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
       setState(() {});
     } else {
       taskToUpdate.status = oldStatusValue;
-      //todo display snackbar
+      UiHelper.displaySnackbar(
+          context, "Failed to change task status. Service error.");
     }
   }
 
-  //TODO: display snackbar
+  //TODO: testing
   Future<void> _createTask(Task createdTask) async {
     TaskServiceResult result = await widget.taskService.createTask(createdTask);
 
@@ -195,11 +224,12 @@ class _TaskListScreenState extends State<TaskListScreen> {
         subtasks.add(createdTaskFromApi);
       });
     } else {
-      //todo display snackbar
+      UiHelper.displaySnackbar(
+          context, "Failed to create task. Service error.");
     }
   }
 
-  //TODO: display snackbar
+  //TODO: testing
   Future<void> _deleteTask(Task taskToDelete) async {
     if (taskToDelete.parentId == null) {
       return;
@@ -226,7 +256,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
         });
       }
     } else {
-      //todo show user snackbar
+      UiHelper.displaySnackbar(
+          context, "Failed to delete task. Service error.");
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
 import 'package:sharp_wing_frontend/services/task_service_result.dart';
+import 'package:sharp_wing_frontend/helpers/ui_helper.dart';
 
 class TaskEditScreen extends StatefulWidget {
   final Task task;
@@ -82,7 +83,10 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
 
       Navigator.pop(context);
     } else {
-      //handle unsuccessful task update
+      if (!context.mounted) return;
+
+      UiHelper.displaySnackbar(
+          context, "Failed to update task. Service error.");
     }
   }
 }
