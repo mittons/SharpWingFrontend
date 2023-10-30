@@ -26,7 +26,7 @@ jobs:
       run: flutter pub get
 
     - name: Build Flutter Web
-      run: flutter build web --release --dart-define=FLAVOR=prod --base-href /SharpWingFront/
+      run: flutter build web --release --dart-define=FLAVOR=prod --base-href /SharpWingFrontend/
 
     - name: Deploy to gh-pages
       run: |
