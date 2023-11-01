@@ -3,18 +3,24 @@ import 'package:http/http.dart' as http;
 import 'package:sharp_wing_frontend/models/task.dart';
 import 'package:sharp_wing_frontend/models/task_details_response.dart';
 import 'package:sharp_wing_frontend/services/task_service_result.dart';
+import 'package:sharp_wing_frontend/utils/service_locator.dart';
 
 class TaskService {
   final String baseApiUrl; // Replace with your API base URL
 
   TaskService({required this.baseApiUrl});
 
+  http.Client _getHttpClient() {
+    return serviceLocator<http.Client>();
+  }
+
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
   Future<TaskServiceResult<List<Task>>> getAllTasks() async {
     try {
-      final response = await http.get(Uri.parse('$baseApiUrl/api/tasks'));
+      final response =
+          await _getHttpClient().get(Uri.parse('$baseApiUrl/api/tasks'));
 
       if (response.statusCode == 200) {
         // If the server returns a 200 OK response, parse the JSON
@@ -39,8 +45,8 @@ class TaskService {
   //TODO: Log exceptions
   Future<TaskServiceResult<Task>> getTaskById(int taskId) async {
     try {
-      final response =
-          await http.get(Uri.parse('$baseApiUrl/api/tasks/$taskId'));
+      final response = await _getHttpClient()
+          .get(Uri.parse('$baseApiUrl/api/tasks/$taskId'));
 
       if (response.statusCode == 200) {
         final dynamic jsonResponse = json.decode(response.body);
@@ -63,8 +69,8 @@ class TaskService {
   Future<TaskServiceResult<TaskDetailsResponse>> getTaskDetails(
       int taskId) async {
     try {
-      final response =
-          await http.get(Uri.parse('$baseApiUrl/api/tasks/$taskId/details'));
+      final response = await _getHttpClient()
+          .get(Uri.parse('$baseApiUrl/api/tasks/$taskId/details'));
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -86,7 +92,8 @@ class TaskService {
   //TODO: Log exceptions
   Future<TaskServiceResult<Task>> getRootTask() async {
     try {
-      final response = await http.get(Uri.parse('$baseApiUrl/api/tasks/root'));
+      final response =
+          await _getHttpClient().get(Uri.parse('$baseApiUrl/api/tasks/root'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -107,7 +114,7 @@ class TaskService {
   //TODO: Log exceptions
   Future<TaskServiceResult<Task>> createTask(Task task) async {
     try {
-      final response = await http.post(
+      final response = await _getHttpClient().post(
         Uri.parse('$baseApiUrl/api/tasks'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(task.toJson()),
@@ -135,7 +142,7 @@ class TaskService {
   Future<TaskServiceResult<NoContent>> updateTask(
       int taskId, Task updatedTask) async {
     try {
-      final response = await http.put(
+      final response = await _getHttpClient().put(
         Uri.parse('$baseApiUrl/api/tasks/$taskId'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(updatedTask.toJson()),
@@ -159,8 +166,8 @@ class TaskService {
   //TODO: Log exceptions
   Future<TaskServiceResult<NoContent>> deleteTask(int taskId) async {
     try {
-      final response =
-          await http.delete(Uri.parse('$baseApiUrl/api/tasks/$taskId'));
+      final response = await _getHttpClient()
+          .delete(Uri.parse('$baseApiUrl/api/tasks/$taskId'));
 
       if (response.statusCode != 204) {
         //print('Failed to delete task: ${response.statusCode}');

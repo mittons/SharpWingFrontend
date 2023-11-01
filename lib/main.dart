@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:sharp_wing_frontend/screens/task_list_screen.dart';
 import 'package:sharp_wing_frontend/config/config.dart';
 import 'package:sharp_wing_frontend/services/task_service.dart';
+import 'package:sharp_wing_frontend/utils/service_locator.dart';
 
 AppConfig activeConfig = ProductionConfig();
 
@@ -19,6 +20,8 @@ void main() {
   } else {
     activeConfig = DevConfig();
   }
+
+  setupServiceLocator(); //set up service locator from utils/service_locator.dart
 
   runApp(TaskListApp(config: activeConfig));
 }
