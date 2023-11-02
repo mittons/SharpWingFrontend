@@ -17,7 +17,7 @@ SharpWing is a task management application designed as a demonstration of softwa
 
 ## Installation
 
-A step-by-step guide on how to get your development environment running.
+A step-by-step guide on how to get the application running.
 
 1. Clone the repo:
 ```
