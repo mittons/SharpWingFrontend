@@ -191,7 +191,7 @@ class _TaskListScreenState extends State<TaskListScreen> {
     taskToUpdate.status = newValue! ? 'completed' : 'not completed';
 
     TaskServiceResult result =
-        await widget.taskService.updateTask(taskToUpdate.taskId, taskToUpdate);
+        await widget.taskService.updateTask(taskToUpdate);
 
     if (!context.mounted) return;
 

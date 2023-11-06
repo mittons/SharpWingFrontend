@@ -72,8 +72,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
       taskLifecycleType: widget.task.taskLifecycleType,
     );
 
-    TaskServiceResult result =
-        await widget.taskService.updateTask(widget.task.taskId, updatedTask);
+    TaskServiceResult result = await widget.taskService.updateTask(updatedTask);
 
     if (result.success) {
       // Task updated successfully, call the onSave callback
