@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('TaskListSection Tests', () {
+  group('TaskEditScreen Widget Tests', () {
     //Define tests
   });
 }

@@ -5,13 +5,13 @@
 enum TaskLifecycleType { Setup, Recurring, Closure, AdHoc }
 
 class Task {
-  final int taskId;
-  final int? parentId;
-  final String taskName;
-  final String description;
-  final DateTime createdDate;
+  int taskId;
+  int? parentId;
+  String taskName;
+  String description;
+  DateTime createdDate;
   String status;
-  final TaskLifecycleType taskLifecycleType;
+  TaskLifecycleType taskLifecycleType;
 
   Task({
     required this.taskId,

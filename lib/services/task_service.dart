@@ -139,11 +139,10 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<NoContent>> updateTask(
-      int taskId, Task updatedTask) async {
+  Future<TaskServiceResult<NoContent>> updateTask(Task updatedTask) async {
     try {
       final response = await _getHttpClient().put(
-        Uri.parse('$baseApiUrl/api/tasks/$taskId'),
+        Uri.parse('$baseApiUrl/api/tasks/${updatedTask.taskId}'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(updatedTask.toJson()),
       );
