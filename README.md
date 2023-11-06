@@ -42,7 +42,7 @@ This section provides an overview of planned enhancements and features for this 
 
 ### Upcoming Features
 
-- **Unit Tests**: Ensuring robustness by adding unit tests to verify individual parts of the code.
+- ~~**Unit Tests**: Ensuring robustness by adding unit tests to verify individual parts of the code.~~ (Completed on Nov 06 2023).
 - **Widget Tests**: Validate the UI and widget behavior to ensure a smooth user experience.
 - **Integration Tests**: Incorporating tests that check if different pieces of the project work together as expected.
 - **Logging**: Implementing comprehensive logging to aid in debugging and application monitoring.
