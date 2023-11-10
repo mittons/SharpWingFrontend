@@ -6,9 +6,6 @@ import 'package:sharp_wing_frontend/models/task.dart';
 
 import '../../mock/mock_task_data_layer.dart';
 
-//Define tests
-//test if the right amount of tasks is displayed
-
 void main() {
   group('TaskListSection Widget Tests', () {
     testWidgets('TaskListSection displays correct title - Setup',
