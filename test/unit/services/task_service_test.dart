@@ -9,12 +9,12 @@ import 'package:sharp_wing_frontend/utils/service_locator.dart';
 import 'package:http/http.dart' as http;
 
 import '../../mock/mock_http_client_factory.dart';
-import '../../mock/mock_task_service.dart';
+import '../../mock/mock_task_data_layer.dart';
 
 void main() {
   group('TaskService Unit Tests - Happy paths', () {
     AppConfig appConfig = TestConfig();
-    MockTaskService mockTaskService = MockTaskService();
+    MockTaskDataLayer mockTaskDataLayer = MockTaskDataLayer();
 
     tearDown(() => {
           serviceLocator.unregister<http.Client>(),
@@ -22,7 +22,7 @@ void main() {
 
     test('getAllTasks returns success 200', () async {
       var desiredResponseMap =
-          mockTaskService.getAllTasks().map((task) => task.toJson()).toList();
+          mockTaskDataLayer.getAllTasks().map((task) => task.toJson()).toList();
 
       String desiredResponseJson = json.encode(desiredResponseMap);
 
@@ -37,7 +37,7 @@ void main() {
     });
 
     test('getTaskById returns success 200', () async {
-      var desiredResponseMap = mockTaskService.getTaskById(1)!.toJson();
+      var desiredResponseMap = mockTaskDataLayer.getTaskById(1)!.toJson();
 
       String desiredResponseJson = json.encode(desiredResponseMap);
 
@@ -52,13 +52,13 @@ void main() {
     });
 
     test('getTaskDetails returns success 200', () async {
-      Task task1 = mockTaskService.getTaskById(1)!;
-      List<Task> subTasks = mockTaskService
+      Task task1 = mockTaskDataLayer.getTaskById(1)!;
+      List<Task> subTasks = mockTaskDataLayer
           .getAllTasks()
           .where((task) => task.parentId == 1)
           .toList();
       List<Task> pathEnumeration = [
-        mockTaskService.getTaskById(task1.parentId!)!
+        mockTaskDataLayer.getTaskById(task1.parentId!)!
       ];
 
       Map<String, dynamic> desiredResponseMap = {
@@ -80,7 +80,7 @@ void main() {
     });
 
     test('getRootTask returns success 200', () async {
-      var desiredResponseMap = mockTaskService.getTaskById(0)!.toJson();
+      var desiredResponseMap = mockTaskDataLayer.getTaskById(0)!.toJson();
 
       String desiredResponseJson = json.encode(desiredResponseMap);
 
@@ -95,7 +95,7 @@ void main() {
     });
 
     test('createTask returns success 201', () async {
-      Task taskToCreate = mockTaskService.getTaskById(1)!;
+      Task taskToCreate = mockTaskDataLayer.getTaskById(1)!;
 
       var desiredResponseMap = taskToCreate.toJson();
       String desiredResponseJson = json.encode(desiredResponseMap);
@@ -111,7 +111,7 @@ void main() {
     });
 
     test('updateTask returns success 204', () async {
-      Task taskToUpdate = mockTaskService.getTaskById(1)!;
+      Task taskToUpdate = mockTaskDataLayer.getTaskById(1)!;
 
       serviceLocator
           .registerSingleton<http.Client>(MockClientFactory.get204Client());
@@ -139,7 +139,7 @@ void main() {
 
   group('TaskService Unit Tests - Invalid Json Returns', () {
     AppConfig appConfig = TestConfig();
-    MockTaskService mockTaskService = MockTaskService();
+    MockTaskDataLayer mockTaskDataLayer = MockTaskDataLayer();
 
     tearDown(() => {
           serviceLocator.unregister<http.Client>(),
@@ -203,7 +203,7 @@ void main() {
 
     test('createTask returns NO-success 201 - invalid response format',
         () async {
-      Task taskToCreate = mockTaskService.getTaskById(1)!;
+      Task taskToCreate = mockTaskDataLayer.getTaskById(1)!;
 
       String invalidResponseJson = json.encode("123#abc");
 
@@ -221,7 +221,7 @@ void main() {
   group('TaskService Unit Tests - Http Client Exceptions and Errors', () {
     AppConfig appConfig = TestConfig();
 
-    MockTaskService mockTaskService = MockTaskService();
+    MockTaskDataLayer mockTaskDataLayer = MockTaskDataLayer();
 
     tearDown(() => {
           serviceLocator.unregister<http.Client>(),
@@ -245,10 +245,10 @@ void main() {
       res = await taskService.getRootTask();
       expect(res.success, false);
 
-      res = await taskService.createTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.createTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
-      res = await taskService.updateTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.updateTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
       res = await taskService.deleteTask(1);
@@ -273,10 +273,10 @@ void main() {
       res = await taskService.getRootTask();
       expect(res.success, false);
 
-      res = await taskService.createTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.createTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
-      res = await taskService.updateTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.updateTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
       res = await taskService.deleteTask(1);
@@ -301,10 +301,10 @@ void main() {
       res = await taskService.getRootTask();
       expect(res.success, false);
 
-      res = await taskService.createTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.createTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
-      res = await taskService.updateTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.updateTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
       res = await taskService.deleteTask(1);
@@ -329,10 +329,10 @@ void main() {
       res = await taskService.getRootTask();
       expect(res.success, false);
 
-      res = await taskService.createTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.createTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
-      res = await taskService.updateTask(mockTaskService.getTaskById(1)!);
+      res = await taskService.updateTask(mockTaskDataLayer.getTaskById(1)!);
       expect(res.success, false);
 
       res = await taskService.deleteTask(1);

@@ -44,10 +44,12 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
             TextField(
               controller: taskNameController,
               decoration: const InputDecoration(labelText: 'Task Name'),
+              key: const Key('taskNameEditField'),
             ),
             TextField(
               controller: descriptionController,
               decoration: const InputDecoration(labelText: 'Description'),
+              key: const Key('taskDescriptionEditField'),
             ),
             ElevatedButton(
               onPressed: _updateTask,

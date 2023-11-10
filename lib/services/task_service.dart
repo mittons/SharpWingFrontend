@@ -17,7 +17,7 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<List<Task>>> getAllTasks() async {
+  Future<TaskServiceResult<List<Task>?>> getAllTasks() async {
     try {
       final response =
           await _getHttpClient().get(Uri.parse('$baseApiUrl/api/tasks'));
@@ -43,7 +43,7 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<Task>> getTaskById(int taskId) async {
+  Future<TaskServiceResult<Task?>> getTaskById(int taskId) async {
     try {
       final response = await _getHttpClient()
           .get(Uri.parse('$baseApiUrl/api/tasks/$taskId'));
@@ -66,7 +66,7 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<TaskDetailsResponse>> getTaskDetails(
+  Future<TaskServiceResult<TaskDetailsResponse?>> getTaskDetails(
       int taskId) async {
     try {
       final response = await _getHttpClient()
@@ -90,7 +90,7 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<Task>> getRootTask() async {
+  Future<TaskServiceResult<Task?>> getRootTask() async {
     try {
       final response =
           await _getHttpClient().get(Uri.parse('$baseApiUrl/api/tasks/root'));
@@ -112,7 +112,7 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<Task>> createTask(Task task) async {
+  Future<TaskServiceResult<Task?>> createTask(Task task) async {
     try {
       final response = await _getHttpClient().post(
         Uri.parse('$baseApiUrl/api/tasks'),
@@ -139,7 +139,7 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<NoContent>> updateTask(Task updatedTask) async {
+  Future<TaskServiceResult<NoContent?>> updateTask(Task updatedTask) async {
     try {
       final response = await _getHttpClient().put(
         Uri.parse('$baseApiUrl/api/tasks/${updatedTask.taskId}'),
@@ -163,7 +163,7 @@ class TaskService {
   //TODO: Clean commented code
   //TODO: Log http status code
   //TODO: Log exceptions
-  Future<TaskServiceResult<NoContent>> deleteTask(int taskId) async {
+  Future<TaskServiceResult<NoContent?>> deleteTask(int taskId) async {
     try {
       final response = await _getHttpClient()
           .delete(Uri.parse('$baseApiUrl/api/tasks/$taskId'));

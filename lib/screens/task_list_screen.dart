@@ -45,8 +45,8 @@ class _TaskListScreenState extends State<TaskListScreen> {
         message: "Failed to load home task. Service error.",
       );
       if (!context.mounted) return;
-
       result = await widget.taskService.getRootTask();
+
       if (!context.mounted) return;
     }
 
@@ -99,12 +99,13 @@ class _TaskListScreenState extends State<TaskListScreen> {
     if (isLoading) {
       return Scaffold(
           appBar: AppBar(
-            title: Text('Task List'),
+            title: const Text('Task List'),
           ),
           body: const Center(
               child: CircularProgressIndicator()) // Show a loading indicator
           );
     }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Task List'),
