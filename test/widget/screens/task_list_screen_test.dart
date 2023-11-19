@@ -12,6 +12,18 @@ import 'package:sharp_wing_frontend/widgets/task_create_widget.dart';
 import 'package:sharp_wing_frontend/widgets/task_list_section.dart';
 import '../../mock/mock_task_service.dart';
 
+// ============================================================================================
+// | Yes there is stuff here that is repeated and COULD be extracted into seperate functions
+// | ---I'm aware and
+// | ------ I will extract specific actions, setup code and such in my future code (I learn).
+// | ------ This is my first project writing tests
+// | --------- Abstractions don't come until after you write your first code...
+// | --------- I could do it here..
+// | --------- But this is a practice project and it will die soon after I write theses tests
+// | --------- I could focus my time on implementing what I learn in this project now but..
+// | --------- I would rather do it as I build my next practice projects. Better use of time.
+// ============================================================================================
+
 void main() {
   group('TaskListScreen Widget Tests', () {
     AppConfig appConfig = TestConfig();
@@ -70,38 +82,8 @@ void main() {
 
       // Hijack the task details function in the mock task service
       //   Make it return two subtasks for each life cycle type.
-      mockTaskService.onGetTaskDetails = (res, taskId) {
-        TaskDetailsResponse response = res.data as TaskDetailsResponse;
-        var allTasksButCurrent =
-            allTasks.where((task) => taskId != response.currentTask.taskId);
-        List<Task> twoOfEach = [];
-        twoOfEach.addAll(allTasksButCurrent
-            .where((task) => task.taskLifecycleType == TaskLifecycleType.Setup)
-            .toList()
-            .sublist(0, 2));
-        twoOfEach.addAll(allTasksButCurrent
-            .where(
-                (task) => task.taskLifecycleType == TaskLifecycleType.Recurring)
-            .toList()
-            .sublist(0, 2));
-        twoOfEach.addAll(allTasksButCurrent
-            .where(
-                (task) => task.taskLifecycleType == TaskLifecycleType.Closure)
-            .toList()
-            .sublist(0, 2));
-        twoOfEach.addAll(allTasksButCurrent
-            .where((task) => task.taskLifecycleType == TaskLifecycleType.AdHoc)
-            .toList()
-            .sublist(0, 2));
-
-        return TaskServiceResult(
-          data: TaskDetailsResponse(
-              currentTask: response.currentTask,
-              subTasks: twoOfEach,
-              pathEnumeration: response.pathEnumeration),
-          success: true,
-        );
-      };
+      mockTaskService.onGetTaskDetails =
+          (res, taskId) => getResponseWithTwoOfEachType(res, allTasks, taskId);
 
       await tester.pumpWidget(
           MaterialApp(home: TaskListScreen(taskService: mockTaskService)));
@@ -216,4 +198,244 @@ void main() {
       expect(find.byType(TaskCreateWidget), findsOneWidget);
     });
   });
+
+  group(
+      'TaskListScreen Widget Tests - Unit functions that depend on custom subwidgets',
+      () {
+    AppConfig appConfig = TestConfig();
+    var mockTaskService = MockTaskService(baseApiUrl: appConfig.baseApiUrl);
+
+    tearDown(() => {
+          mockTaskService.onCreateTask = null,
+          mockTaskService.onDeleteTask = null,
+          mockTaskService.onGetAllTasks = null,
+          mockTaskService.onGetRootTask = null,
+          mockTaskService.onGetTaskById = null,
+          mockTaskService.onGetTaskDetails = null,
+          mockTaskService.onUpdateTask = null,
+        });
+
+    testWidgets('Create task delivers task object to service',
+        (WidgetTester tester) async {
+      // Set the size of the screen so that all task list sections get loaded.
+      tester.view.physicalSize = const Size(2000, 5000);
+
+      String taskToCreateName = "Ctdtots Task Name";
+      String taskToCreateDescription = "Ctdtots Task Description";
+      // Set to default value of a fresh instance of task create widget.
+      TaskLifecycleType taskToCreateType = TaskLifecycleType.Setup;
+
+      // We can expect this value to be true at the end of this testing function
+      bool onCreateTaskCalled = false;
+
+      mockTaskService.onCreateTask = (res, taskToCreate) {
+        //Test if we got the desired task create inputs
+        expect(taskToCreate.taskName, taskToCreateName);
+        expect(taskToCreate.description, taskToCreateDescription);
+        expect(taskToCreate.taskLifecycleType, taskToCreateType);
+
+        //This will be checked at the end of the testWidgets function.
+        onCreateTaskCalled = true;
+        return res;
+      };
+
+      await tester.pumpWidget(
+          MaterialApp(home: TaskListScreen(taskService: mockTaskService)));
+
+      await tester.pumpAndSettle();
+
+      //Find task create widget
+      Finder taskCreateWidgetFinder = find.byType(TaskCreateWidget);
+
+      //Expand task create widget
+      await tester.tap(find.descendant(
+          of: taskCreateWidgetFinder,
+          matching: find.text("Create a New Task")));
+      await tester.pump();
+
+      //Enter text
+      await tester.enterText(
+          find.descendant(
+              of: taskCreateWidgetFinder,
+              matching: find.widgetWithText(TextFormField, 'Task Name')),
+          taskToCreateName);
+
+      //Enter description
+      await tester.enterText(
+          find.descendant(
+              of: taskCreateWidgetFinder,
+              matching: find.widgetWithText(TextField, 'Description')),
+          taskToCreateDescription);
+
+      //Assert the default value for taskcreatewidget is TaskLifecycleType.Setup
+      final dropdownFinder = find.descendant(
+          of: taskCreateWidgetFinder,
+          matching: find.byType(DropdownButtonFormField<TaskLifecycleType>));
+
+      expect(find.descendant(of: dropdownFinder, matching: find.text("Setup")),
+          findsOneWidget);
+
+      // Submit the form
+      await tester.tap(find.descendant(
+          of: taskCreateWidgetFinder,
+          matching: find.widgetWithText(ElevatedButton, 'Create Task')));
+      await tester.pump();
+
+      // Ensure the task create function in the service got called by task list screen.
+      expect(onCreateTaskCalled, true);
+
+      tester.view.resetPhysicalSize();
+    });
+
+    testWidgets('OnToggle task list item delivers task object to task service',
+        (WidgetTester tester) async {
+      // Set the size of the screen so that all task list sections get loaded.
+      tester.view.physicalSize = const Size(2000, 5000);
+
+      late Task currentTask;
+      late List<Task> subTasks;
+      late Task taskToUpdate;
+      late String taskToUpdateInitialStatus;
+
+      bool onGetTaskDetailsCalled = false;
+
+      mockTaskService.onGetTaskDetails = (res, taskId) {
+        TaskDetailsResponse responseData = res.data;
+        currentTask = responseData.currentTask;
+        subTasks = responseData.subTasks;
+        taskToUpdate = subTasks[0];
+        taskToUpdateInitialStatus = taskToUpdate.status;
+
+        onGetTaskDetailsCalled = true;
+        return res;
+      };
+
+      // We can expect this value to be true at the end of this testing function
+      bool onUpdateTaskCalled = false;
+
+      mockTaskService.onUpdateTask = (res, updatedTask) {
+        //Expect task details have been fetched, and such initializing the late variables used in this function.
+        expect(onGetTaskDetailsCalled, true);
+
+        //Expect we get an updated task status
+        expect(updatedTask.status, isNot(taskToUpdateInitialStatus));
+        onUpdateTaskCalled = true;
+        return res;
+      };
+
+      await tester.pumpWidget(
+          MaterialApp(home: TaskListScreen(taskService: mockTaskService)));
+
+      await tester.pumpAndSettle();
+
+      //Expect task details have been fetched, and such initializing our late variables.
+      expect(onGetTaskDetailsCalled, true);
+
+      Finder subjectTaskItemFinder =
+          find.byKey(Key("TaskItem_${taskToUpdate.taskId}"));
+
+      Finder subjectCheckboxFinder = find.descendant(
+          of: subjectTaskItemFinder, matching: find.byType(Checkbox));
+
+      await tester.tap(subjectCheckboxFinder);
+      await tester.pump();
+
+      // Ensure the task update function in the service got called by task list screen.
+      expect(onUpdateTaskCalled, true);
+
+      tester.view.resetPhysicalSize();
+    });
+
+    testWidgets('On delete task list item delivers taskId to task service',
+        (WidgetTester tester) async {
+      // Set the size of the screen so that all task list sections get loaded.
+      tester.view.physicalSize = const Size(2000, 5000);
+
+      late Task currentTask;
+      late List<Task> subTasks;
+      late Task taskToDelete;
+
+      bool onGetTaskDetailsCalled = false;
+
+      mockTaskService.onGetTaskDetails = (res, taskId) {
+        TaskDetailsResponse responseData = res.data;
+        currentTask = responseData.currentTask;
+        subTasks = responseData.subTasks;
+        taskToDelete = subTasks[0];
+
+        onGetTaskDetailsCalled = true;
+        return res;
+      };
+
+      // We can expect this value to be true at the end of this testing function
+      bool onDeleteTaskCalled = false;
+
+      mockTaskService.onDeleteTask = (res, taskId) {
+        //Expect task details have been fetched, and such initializing the late variables used in this function.
+        expect(onGetTaskDetailsCalled, true);
+
+        expect(taskId, taskToDelete.taskId);
+        onDeleteTaskCalled = true;
+
+        return res;
+      };
+
+      await tester.pumpWidget(
+          MaterialApp(home: TaskListScreen(taskService: mockTaskService)));
+
+      await tester.pumpAndSettle();
+
+      //Expect task details have been fetched, and such initializing our late variables.
+      expect(onGetTaskDetailsCalled, true);
+
+      Finder subjectTaskItemFinder =
+          find.byKey(Key("TaskItem_${taskToDelete.taskId}"));
+
+      Finder subjectIconButtonFinder = find.descendant(
+          of: subjectTaskItemFinder,
+          matching: find.widgetWithIcon(IconButton, Icons.delete));
+
+      await tester.tap(subjectIconButtonFinder);
+      await tester.pump();
+
+      // Ensure the task delete function in the service got called by task list screen.
+      expect(onDeleteTaskCalled, true);
+
+      tester.view.resetPhysicalSize();
+    });
+  });
+}
+
+// For hijacking the task details function in the mock task service
+//   Make it return two subtasks for each life cycle type.
+TaskServiceResult<TaskDetailsResponse> getResponseWithTwoOfEachType(
+    TaskServiceResult<dynamic> res, List<Task> allTasks, int taskId) {
+  TaskDetailsResponse response = res.data as TaskDetailsResponse;
+  var allTasksButCurrent =
+      allTasks.where((task) => taskId != response.currentTask.taskId);
+  List<Task> twoOfEach = [];
+  twoOfEach.addAll(allTasksButCurrent
+      .where((task) => task.taskLifecycleType == TaskLifecycleType.Setup)
+      .toList()
+      .sublist(0, 2));
+  twoOfEach.addAll(allTasksButCurrent
+      .where((task) => task.taskLifecycleType == TaskLifecycleType.Recurring)
+      .toList()
+      .sublist(0, 2));
+  twoOfEach.addAll(allTasksButCurrent
+      .where((task) => task.taskLifecycleType == TaskLifecycleType.Closure)
+      .toList()
+      .sublist(0, 2));
+  twoOfEach.addAll(allTasksButCurrent
+      .where((task) => task.taskLifecycleType == TaskLifecycleType.AdHoc)
+      .toList()
+      .sublist(0, 2));
+
+  return TaskServiceResult(
+    data: TaskDetailsResponse(
+        currentTask: response.currentTask,
+        subTasks: twoOfEach,
+        pathEnumeration: response.pathEnumeration),
+    success: true,
+  );
 }
