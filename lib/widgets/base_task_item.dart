@@ -17,6 +17,9 @@ abstract class BaseTaskItem extends StatelessWidget {
     this.cardColor = Colors.white,
   }) : super(key: key);
 
+  @override
+  Key? get key => super.key ?? Key("TaskItem_${task.taskId}");
+
   // Always display the task's name and optionally its description.
   @override
   Widget build(BuildContext context) {
