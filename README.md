@@ -44,7 +44,7 @@ This section provides an overview of planned enhancements and features for this 
 
 - ~~**Unit Tests**: Ensuring robustness by adding unit tests to verify individual parts of the code.~~ (Completed on Nov 06 2023).
 - ~~**Widget Tests**: Validate the UI and widget behavior to ensure a smooth user experience.~~ (Completed on Nov 10 2023).
-- **Integration Tests**: Incorporating tests that check if different pieces of the project work together as expected.
+- ~~**Integration Tests**: Incorporating tests that check if different pieces of the project work together as expected.~~ (Completed on Nov 30 2023).
 - **Logging**: Implementing comprehensive logging to aid in debugging and application monitoring.
 - **Documentation**: Comprehensive documentation to aid developers and users in understanding and using the project effectively.
 - **CI/CD Automation**: Setting up GitHub Action scripts for Continuous Integration and Continuous Deployment, tailored for different development environments/branches (dev, staging, prod).
