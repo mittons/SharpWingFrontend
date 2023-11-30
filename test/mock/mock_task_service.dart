@@ -65,14 +65,19 @@ class MockTaskService extends TaskService {
   @override
   Future<TaskServiceResult<TaskDetailsResponse?>> getTaskDetails(
       int taskId) async {
-    Task currentTask = mockTaskDataLayer.getTaskById(1)!;
+    Task currentTask = mockTaskDataLayer.getTaskById(taskId)!;
     List<Task> subTasks = mockTaskDataLayer
         .getAllTasks()
         .where((task) => task.parentId == currentTask.taskId)
         .toList();
-    List<Task> pathEnumeration = [
-      mockTaskDataLayer.getTaskById(currentTask.parentId!)!
-    ];
+
+    List<Task> pathEnumeration = [currentTask];
+    Task nextAncestor = currentTask;
+    while (nextAncestor.parentId != null) {
+      nextAncestor = mockTaskDataLayer.getTaskById(nextAncestor.parentId!)!;
+      pathEnumeration.insert(0, nextAncestor);
+    }
+
     // Return mock task details
     var mockTaskDetails = TaskDetailsResponse(
         currentTask: currentTask,
@@ -115,9 +120,11 @@ class MockTaskService extends TaskService {
 
   @override
   Future<TaskServiceResult<Task?>> createTask(Task task) async {
+    Task newDataLayerTask = mockTaskDataLayer.addTask(task);
+
     // Simulate task creation by returning the same task with a mock ID
     TaskServiceResult<Task?> result = TaskServiceResult(
-      data: task,
+      data: newDataLayerTask,
       success: true,
     );
 
@@ -130,6 +137,8 @@ class MockTaskService extends TaskService {
 
   @override
   Future<TaskServiceResult<NoContent?>> updateTask(Task updatedTask) async {
+    mockTaskDataLayer.updateTask(updatedTask);
+
     // Simulate a successful update
     TaskServiceResult<NoContent?> result = TaskServiceResult(
       data: NoContent(),
@@ -146,6 +155,8 @@ class MockTaskService extends TaskService {
 
   @override
   Future<TaskServiceResult<NoContent?>> deleteTask(int taskId) async {
+    mockTaskDataLayer.deleteTask(taskId);
+
     // Simulate a successful delete
     TaskServiceResult<NoContent?> result = TaskServiceResult(
       data: NoContent(),

@@ -17,7 +17,17 @@ void main() {
           'taskLifecycleType': 0,
         },
         'subTasks': [],
-        'pathEnumeration': [],
+        'pathEnumeration': [
+          {
+            'taskId': 1,
+            'parentId': null,
+            'taskName': 'Test Task',
+            'description': 'This is a test task',
+            'createdDate': DateTime.now().toIso8601String(),
+            'status': 'not completed',
+            'taskLifecycleType': 0,
+          }
+        ],
       };
 
       // Using fromJson to create a TaskDetailsResponse instance
@@ -27,7 +37,7 @@ void main() {
       expect(result.currentTask.taskId, 1);
       expect(result.currentTask.taskName, 'Test Task');
       expect(result.subTasks, isEmpty);
-      expect(result.pathEnumeration, isEmpty);
+      expect(result.pathEnumeration.length, 1);
     });
   });
 
@@ -47,7 +57,7 @@ void main() {
       // Asserts to ensure the deserialization worked as expected
       expect(result.currentTask, isInstanceOf<Task>());
       expect(result.subTasks.length, 2);
-      expect(result.pathEnumeration.length, 2);
+      expect(result.pathEnumeration.length, 3);
     });
 
     test('fromJson throws error on invalid current task date data', () {
@@ -103,7 +113,7 @@ void main() {
       // Asserts to ensure the deserialization worked as expected
       expect(result.currentTask, isInstanceOf<Task>());
       expect(result.subTasks.length, 2);
-      expect(result.pathEnumeration.length, 2);
+      expect(result.pathEnumeration.length, 3);
     });
 
     test('fromJson throws error on invalid current task LifeCycleType data',
@@ -209,7 +219,16 @@ Map<String, dynamic> _getMockJsonForDateValidation(
             .toIso8601String(), // Example date in YYYY-MM-DD format
         'status': 'not completed',
         'taskLifecycleType': 0,
-      }
+      },
+      {
+        'taskId': 2,
+        'parentId': 1,
+        'taskName': 'Test Task',
+        'description': 'This is a test task',
+        'createdDate': createDateCurrentTask,
+        'status': 'not completed',
+        'taskLifecycleType': 0,
+      },
     ],
   };
 
@@ -278,7 +297,16 @@ Map<String, dynamic> _getMockJsonForLifeCycleTypeValidation(
             .toIso8601String(), // Example date in YYYY-MM-DD format
         'status': 'not completed',
         'taskLifecycleType': 0,
-      }
+      },
+      {
+        'taskId': 2,
+        'parentId': 1,
+        'taskName': 'Test Task',
+        'description': 'This is a test task',
+        'createdDate': DateTime.now().toIso8601String(),
+        'status': 'not completed',
+        'taskLifecycleType': lcTypeCurrentTask,
+      },
     ],
   };
 

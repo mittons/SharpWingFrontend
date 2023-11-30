@@ -412,7 +412,7 @@ TaskServiceResult<TaskDetailsResponse> getResponseWithTwoOfEachType(
     TaskServiceResult<dynamic> res, List<Task> allTasks, int taskId) {
   TaskDetailsResponse response = res.data as TaskDetailsResponse;
   var allTasksButCurrent =
-      allTasks.where((task) => taskId != response.currentTask.taskId);
+      allTasks.where((task) => task.taskId != response.currentTask.taskId);
   List<Task> twoOfEach = [];
   twoOfEach.addAll(allTasksButCurrent
       .where((task) => task.taskLifecycleType == TaskLifecycleType.Setup)

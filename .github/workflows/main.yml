@@ -12,10 +12,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup Node.js environment
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20.9.0' # specify the Node version
+    # - name: Setup Node.js environment
+    #   uses: actions/setup-node@v3
+    #   with:
+    #     node-version: '20.9.0' # specify the Node version
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
@@ -24,6 +24,8 @@ jobs:
 
     - name: Install dependencies
       run: flutter pub get
+
+    - name: Run Unit and Widget tests
 
     - name: Build Flutter Web
       run: flutter build web --release --dart-define=FLAVOR=prod --base-href /SharpWingFrontend/

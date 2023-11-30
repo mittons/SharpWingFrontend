@@ -6,6 +6,7 @@ class MockTaskDataLayer {
 
   MockTaskDataLayer() {
     _createMockTasks();
+    nextTaskId = tasks.last.taskId + 1;
   }
 
   List<Task> getAllTasks() {
@@ -16,7 +17,7 @@ class MockTaskDataLayer {
     return tasks.where((task) => task.taskId == taskId).firstOrNull;
   }
 
-  void addTask(Task task) {
+  Task addTask(Task task) {
     Task taskToAdd = Task(
         taskId: nextTaskId++,
         parentId: task.parentId,
@@ -26,6 +27,8 @@ class MockTaskDataLayer {
         status: task.status,
         taskLifecycleType: task.taskLifecycleType);
     tasks.add(taskToAdd);
+
+    return taskToAdd;
   }
 
   void updateTask(Task updatedTask) {
