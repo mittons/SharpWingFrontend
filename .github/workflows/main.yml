@@ -25,8 +25,6 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
-    - name: Run Unit and Widget tests
-
     - name: Build Flutter Web
       run: flutter build web --release --dart-define=FLAVOR=prod --base-href /SharpWingFrontend/
 
