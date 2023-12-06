@@ -40,7 +40,7 @@ jobs:
         pip install docker
 
     - name: Test docker
-      run: docker --version
+      run: python scripts/docker_ctrl.py start ghcr.io/mittons/sharpwingback:latest 3000 5000
 
     - name: Unit tests
       run: flutter test
