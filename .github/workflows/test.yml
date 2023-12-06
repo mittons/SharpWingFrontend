@@ -1,0 +1,36 @@
+name: Flutter CI/CD TEST VERSION
+
+on:
+  push:
+    branches:
+      - test-workflows
+
+jobs:
+  build-and-deploy:
+    runs-on: windows
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # - name: Setup Node.js environment
+    #   uses: actions/setup-node@v3
+    #   with:
+    #     node-version: '20.9.0' # specify the Node version
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.13.7' # specify the Flutter version
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Unit tests
+      run: flutter test
+
+    - name: Integration tests
+      run: flutter test integration_test -d windows
+
+    - name: Build Flutter Web
+      run: flutter build web --release --dart-define=FLAVOR=prod --base-href /SharpWingFrontend/
+
