@@ -17,7 +17,7 @@ class TestConfig extends AppConfig {
   static const String baseApiUrlValue = 'http://localhost:3000';
   final int containerPort = 5000;
   final int hostPort = 3000;
-  final String dockerImage = "ghcr.io/mittons/dockreg26:1.0";
+  final String dockerImage = "ghcr.io/mittons/sharpwingback:latest";
 
   TestConfig() : super(baseApiUrl: baseApiUrlValue);
 }
