@@ -40,6 +40,9 @@ jobs:
         pip install docker
 
     - name: Test docker
+      env:
+        GITHUB_ACTOR: ${{ github.actor }}
+        GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
       run: python scripts/docker_ctrl.py start ghcr.io/mittons/sharpwingback:latest 3000 5000
 
     - name: Unit tests
