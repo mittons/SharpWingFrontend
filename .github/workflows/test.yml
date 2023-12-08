@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -21,13 +21,11 @@ jobs:
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.13.7' # specify the Flutter version
+        flutter-version: '3.13.9' # specify the Flutter version
+        cache: true
 
     - name: Install Flutter dependencies
       run: flutter pub get
-
-    - name: Test Python
-      run: python --version
 
     - name: Set up Python
       uses: actions/setup-python@v2
@@ -39,11 +37,26 @@ jobs:
         python -m pip install --upgrade pip
         pip install docker
 
-    - name: Test docker
-      env:
-        GITHUB_ACTOR: ${{ github.actor }}
-        GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-      run: python scripts/docker_ctrl.py start ghcr.io/mittons/sharpwingback:latest 3000 5000
+    # - name: Test docker
+    #   env:
+    #     GITHUB_ACTOR: ${{ github.actor }}
+    #     GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+    #   run: python scripts/docker_ctrl.py start ghcr.io/mittons/sharpwingback:latest 3000 5000
+    
+    - name: Install ChromeDriver
+      run: |
+        wget -N https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/120.0.6099.71/linux64/chromedriver-linux64.zip -P ~/
+        unzip ~/chromedriver-linux64.zip -d ~/
+        rm ~/chromedriver-linux64.zip
+        sudo mv -f ~/chromedriver-linux64 /usr/local/bin/chromedriver
+        sudo chown root:root /usr/local/bin/chromedriver
+        sudo chmod 0755 /usr/local/bin/chromedriver
+          
+    - name: 📢 Check Chromedriver Version
+      run: chromedriver -v
+
+    - name: Flutter Doctor
+      run: flutter doctor -v
 
     - name: Unit tests
       run: flutter test
@@ -52,7 +65,20 @@ jobs:
       env:
         GITHUB_ACTOR: ${{ github.actor }}
         GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-      run: flutter test integration_test -d windows
+      run: |
+          chromedriver --port=4444 --trace-buffer-size=100000 &
+          flutter drive \
+              --verbose-system-logs \
+              -d web-server \
+              --driver=test_driver/integration_test.dart \
+              --target=integration_test/widget_test.dart
+
+
+    # - name: Integration tests
+    #   env:
+    #     GITHUB_ACTOR: ${{ github.actor }}
+    #     GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+    #   run: flutter test integration_test -d windows
 
     - name: Build Flutter Web
       run: flutter build web --release --dart-define=FLAVOR=prod --base-href /SharpWingFrontend/
