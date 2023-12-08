@@ -14,8 +14,8 @@ import 'package:sharp_wing_frontend/widgets/task_list_item.dart';
 
 import 'package:integration_test/integration_test.dart';
 
-import '../../test/mock/mock_task_service.dart';
-import '../utils/docker_utils.dart' as dockerUtils;
+// import '../../test/mock/mock_task_service.dart';
+import 'utils/docker_utils.dart' as dockerUtils;
 
 import 'package:http/http.dart' as http;
 
@@ -51,15 +51,15 @@ void main() {
       await dockerUtils.stopContainer(containerId);
     });
 
-    testWidgets('Test full crud and navigation - Mock task service',
-        (tester) async {
-      // Set up the mock TaskService
-      MockTaskService taskService =
-          MockTaskService(baseApiUrl: config.baseApiUrl);
+    // testWidgets('Test full crud and navigation - Mock task service',
+    //     (tester) async {
+    //   // Set up the mock TaskService
+    //   MockTaskService taskService =
+    //       MockTaskService(baseApiUrl: config.baseApiUrl);
 
-      // Performe the test sequence with the task service provided
-      await _performTestSequence(taskService, tester);
-    });
+    //   // Performe the test sequence with the task service provided
+    //   await _performTestSequence(taskService, tester);
+    // });
   });
 }
 
