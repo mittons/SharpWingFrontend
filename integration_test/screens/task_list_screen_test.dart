@@ -30,10 +30,10 @@ void main() {
     testWidgets(
         'Test full crud and navigation - TaskService and docker container',
         (tester) async {
-      // Start the docker container running the mock web api image
-      String containerId = await dockerUtils.startContainer(
-          config.dockerImage, config.hostPort, config.containerPort);
-      await Future.delayed(const Duration(seconds: 1));
+      // // Start the docker container running the mock web api image
+      // String containerId = await dockerUtils.startContainer(
+      //     config.dockerImage, config.hostPort, config.containerPort);
+      // await Future.delayed(const Duration(seconds: 1));
 
       // Sets up the http.Client dependency injection for service layer to use
       setupServiceLocator();
@@ -47,8 +47,8 @@ void main() {
       // Unregister the http.Client dependency injection used by the service layer
       serviceLocator.unregister<http.Client>();
 
-      // Stop the docker container
-      await dockerUtils.stopContainer(containerId);
+      // // Stop the docker container
+      // await dockerUtils.stopContainer(containerId);
     });
 
     // testWidgets('Test full crud and navigation - Mock task service',
