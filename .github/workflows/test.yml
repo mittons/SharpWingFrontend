@@ -71,7 +71,7 @@ jobs:
               --verbose-system-logs \
               -d web-server \
               --driver=test_driver/integration_test.dart \
-              --target=integration_test/widget_test.dart
+              --target=integration_test/screens/task_list_screen_test.dart
 
 
     # - name: Integration tests
